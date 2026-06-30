@@ -241,6 +241,15 @@ jobs:
                 --head "$BRANCH_NAME" \
                 --base main)
               echo "✅ App PR created: $PR_URL"
+
+              # Programmatically trigger Jira webhook sync by editing PR title via API (forces Jira to re-process)
+              PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+              if [ -n "$PR_NUM" ]; then
+                echo "🔄 Sleeping 5s before triggering sync..."
+                sleep 5
+                gh api -X PATCH "repos/mohit-mungra-moschip/agentic_pipeline/pulls/$PR_NUM" -f title="$PR_TITLE "
+                echo "✅ Webhook sync triggered successfully."
+              fi
               source .venv/bin/activate
               python3 test_framework/utils/report_utils/update_reports_pr.py --pr-url "$PR_URL" --type "APP_HEAL" --run-id "${{ github.run_id }}"
             else
@@ -308,6 +317,15 @@ jobs:
                 --head "$BRANCH_NAME" \
                 --base main)
               echo "✅ Test PR created: $PR_URL"
+
+              # Programmatically trigger Jira webhook sync by editing PR title via API (forces Jira to re-process)
+              PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+              if [ -n "$PR_NUM" ]; then
+                echo "🔄 Sleeping 5s before triggering sync..."
+                sleep 5
+                gh api -X PATCH "repos/mohit-mungra-moschip/agentic_pipeline_tests/pulls/$PR_NUM" -f title="$PR_TITLE "
+                echo "✅ Webhook sync triggered successfully."
+              fi
               source ../.venv/bin/activate
               python3 utils/report_utils/update_reports_pr.py --pr-url "$PR_URL" --type "TEST_HEAL" --run-id "${{ github.run_id }}"
             else
