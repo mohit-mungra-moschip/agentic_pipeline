@@ -68,7 +68,7 @@ jobs:
       - name: 📥 Checkout Test Repository
         uses: actions/checkout@v4
         with:
-          repository: 'softnauticsgithub/agentic_solution_tests' # <-- Change if your Test repo name is different
+          repository: 'mohit-mungra-moschip/agentic_pipeline_tests'
           token: ${{ secrets.TEST_REPO_TOKEN }}
           path: test_framework
           fetch-depth: 20
@@ -205,12 +205,20 @@ jobs:
               HEALING_TYPE="${{ steps.ai_pipeline.outputs.healing_type }}"
               JIRA_IDS="${{ steps.ai_pipeline.outputs.jira_ids }}"
 
-              BRANCH_NAME="ai-fix/app-${{ github.run_id }}"
+              # Clean Jira IDs for branch naming (replace commas with hyphens and remove spaces)
+              JIRA_BRANCH_PREFIX=""
+              if [ -n "$JIRA_IDS" ]; then
+                JIRA_BRANCH_PREFIX=$(echo "$JIRA_IDS" | tr -d ' ' | tr ',' '-')
+                JIRA_BRANCH_PREFIX="${JIRA_BRANCH_PREFIX}-"
+              fi
+
+              BRANCH_NAME="ai-fix/${JIRA_BRANCH_PREFIX}app-${{ github.run_id }}"
               git checkout -b "$BRANCH_NAME"
               git add -u app/
-              # Include Jira IDs in the commit message for traceability
+              # Include Jira IDs in the commit message for traceability + Smart Commit transition
               if [ -n "$JIRA_IDS" ]; then
-                git commit -m "fix(ai): auto-healed application bug [$HEALING_TYPE]" -m "Jira: $JIRA_IDS"
+                JIRA_KEYS_LIST=$(echo "$JIRA_IDS" | tr ',' ' ')
+                git commit -m "$JIRA_KEYS_LIST #in-review #comment fix(ai): auto-healed application bug [$HEALING_TYPE]"
               else
                 git commit -m "fix(ai): auto-healed application bug [$HEALING_TYPE]"
               fi
@@ -262,13 +270,21 @@ jobs:
               HEALING_TYPE="${{ steps.ai_pipeline.outputs.healing_type }}"
               JIRA_IDS="${{ steps.ai_pipeline.outputs.jira_ids }}"
 
-              BRANCH_NAME="ai-fix/tests-${{ github.run_id }}"
+              # Clean Jira IDs for branch naming (replace commas with hyphens and remove spaces)
+              JIRA_BRANCH_PREFIX=""
+              if [ -n "$JIRA_IDS" ]; then
+                JIRA_BRANCH_PREFIX=$(echo "$JIRA_IDS" | tr -d ' ' | tr ',' '-')
+                JIRA_BRANCH_PREFIX="${JIRA_BRANCH_PREFIX}-"
+              fi
+
+              BRANCH_NAME="ai-fix/${JIRA_BRANCH_PREFIX}tests-${{ github.run_id }}"
               git checkout -b "$BRANCH_NAME"
               # Stage only modified tracked .py files — not new untracked pycache
               git add -u tests/
-              # Include Jira IDs in the commit message for traceability
+              # Include Jira IDs in the commit message for traceability + Smart Commit transition
               if [ -n "$JIRA_IDS" ]; then
-                git commit -m "test(ai): auto-healed test definitions [$HEALING_TYPE]" -m "Jira: $JIRA_IDS"
+                JIRA_KEYS_LIST=$(echo "$JIRA_IDS" | tr ',' ' ')
+                git commit -m "$JIRA_KEYS_LIST #in-review #comment test(ai): auto-healed test definitions [$HEALING_TYPE]"
               else
                 git commit -m "test(ai): auto-healed test definitions [$HEALING_TYPE]"
               fi
@@ -283,7 +299,7 @@ jobs:
               fi
 
               PR_URL=$(gh pr create \
-                --repo "softnauticsgithub/agentic_solution_tests" \
+                --repo "mohit-mungra-moschip/agentic_pipeline_tests" \
                 --title "$PR_TITLE" \
                 --body-file ../reports/pr_body_tests.md \
                 --head "$BRANCH_NAME" \
