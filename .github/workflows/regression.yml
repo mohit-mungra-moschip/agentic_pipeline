@@ -242,12 +242,13 @@ jobs:
                 --base main)
               echo "✅ App PR created: $PR_URL"
 
-              # Programmatically trigger Jira webhook sync by editing PR title via API (forces Jira to re-process)
+              # Programmatically trigger Jira webhook sync by closing and reopening the PR (forces Jira to link)
               PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
               if [ -n "$PR_NUM" ]; then
                 echo "🔄 Sleeping 5s before triggering sync..."
                 sleep 5
-                gh api -X PATCH "repos/mohit-mungra-moschip/agentic_pipeline/pulls/$PR_NUM" -f title="$PR_TITLE "
+                gh pr close "$PR_NUM"
+                gh pr reopen "$PR_NUM"
                 echo "✅ Webhook sync triggered successfully."
               fi
               source .venv/bin/activate
@@ -318,12 +319,13 @@ jobs:
                 --base main)
               echo "✅ Test PR created: $PR_URL"
 
-              # Programmatically trigger Jira webhook sync by editing PR title via API (forces Jira to re-process)
+              # Programmatically trigger Jira webhook sync by closing and reopening the PR (forces Jira to link)
               PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
               if [ -n "$PR_NUM" ]; then
                 echo "🔄 Sleeping 5s before triggering sync..."
                 sleep 5
-                gh api -X PATCH "repos/mohit-mungra-moschip/agentic_pipeline_tests/pulls/$PR_NUM" -f title="$PR_TITLE "
+                gh pr close "$PR_NUM" --repo "mohit-mungra-moschip/agentic_pipeline_tests"
+                gh pr reopen "$PR_NUM" --repo "mohit-mungra-moschip/agentic_pipeline_tests"
                 echo "✅ Webhook sync triggered successfully."
               fi
               source ../.venv/bin/activate
