@@ -142,6 +142,8 @@ jobs:
         env:
           DEFAULT_MODEL: ${{ vars.DEFAULT_MODEL || 'groq/llama-3.3-70b-versatile' }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           JIRA_SERVER: ${{ secrets.JIRA_SERVER }}
           JIRA_USERNAME: ${{ secrets.JIRA_USERNAME }}
