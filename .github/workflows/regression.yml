@@ -235,6 +235,10 @@ jobs:
                 PR_TITLE="[RegressionAI] Auto-Heal: Fix Application Bugs ($HEALING_TYPE)"
               fi
 
+              # Add 20s delay to allow Jira to index the branch/commits before PR creation (prevents race condition)
+              echo "🔄 Sleeping 20 seconds to allow Jira to index the branch and commits..."
+              sleep 20
+
               PR_URL=$(gh pr create \
                 --title "$PR_TITLE" \
                 --body-file reports/pr_body_app.md \
@@ -310,6 +314,10 @@ jobs:
               else
                 PR_TITLE="[RegressionAI] Auto-Heal: Fix Test Assertions ($HEALING_TYPE)"
               fi
+
+              # Add 20s delay to allow Jira to index the branch/commits before PR creation (prevents race condition)
+              echo "🔄 Sleeping 20 seconds to allow Jira to index the branch and commits..."
+              sleep 20
 
               PR_URL=$(gh pr create \
                 --repo "mohit-mungra-moschip/agentic_pipeline_tests" \
