@@ -222,7 +222,7 @@ jobs:
               git add -u app/
               # Include Jira IDs in the commit message for traceability + Smart Commit transition
               if [ -n "$JIRA_IDS" ]; then
-                JIRA_KEYS_LIST=$(echo "$JIRA_IDS" | tr ',' ' ')
+                JIRA_KEYS_LIST=$(echo "$JIRA_IDS" | tr ',' ' ' | tr -s ' ')
                 git commit -m "$JIRA_KEYS_LIST #in-review #comment fix(ai): auto-healed application bug [$HEALING_TYPE]"
               else
                 git commit -m "fix(ai): auto-healed application bug [$HEALING_TYPE]"
@@ -230,9 +230,9 @@ jobs:
               git push --force origin "$BRANCH_NAME"
 
               # Build PR title with Jira IDs
-              JIRA_IDS_SHORT="${{ steps.ai_pipeline.outputs.jira_ids_short }}"
-              if [ -n "$JIRA_IDS_SHORT" ]; then
-                PR_TITLE="[RegressionAI] $JIRA_IDS_SHORT | Auto-Heal: Fix Application Bugs ($HEALING_TYPE)"
+              JIRA_IDS="${{ steps.ai_pipeline.outputs.jira_ids }}"
+              if [ -n "$JIRA_IDS" ]; then
+                PR_TITLE="[RegressionAI] $JIRA_IDS | Auto-Heal: Fix Application Bugs ($HEALING_TYPE)"
               else
                 PR_TITLE="[RegressionAI] Auto-Heal: Fix Application Bugs ($HEALING_TYPE)"
               fi
@@ -298,7 +298,7 @@ jobs:
               git add -u tests/
               # Include Jira IDs in the commit message for traceability + Smart Commit transition
               if [ -n "$JIRA_IDS" ]; then
-                JIRA_KEYS_LIST=$(echo "$JIRA_IDS" | tr ',' ' ')
+                JIRA_KEYS_LIST=$(echo "$JIRA_IDS" | tr ',' ' ' | tr -s ' ')
                 git commit -m "$JIRA_KEYS_LIST #in-review #comment test(ai): auto-healed test definitions [$HEALING_TYPE]"
               else
                 git commit -m "test(ai): auto-healed test definitions [$HEALING_TYPE]"
@@ -306,9 +306,9 @@ jobs:
               git push --force origin "$BRANCH_NAME"
 
               # Build PR title with Jira IDs
-              JIRA_IDS_SHORT="${{ steps.ai_pipeline.outputs.jira_ids_short }}"
-              if [ -n "$JIRA_IDS_SHORT" ]; then
-                PR_TITLE="[RegressionAI] $JIRA_IDS_SHORT | Auto-Heal: Fix Test Assertions ($HEALING_TYPE)"
+              JIRA_IDS="${{ steps.ai_pipeline.outputs.jira_ids }}"
+              if [ -n "$JIRA_IDS" ]; then
+                PR_TITLE="[RegressionAI] $JIRA_IDS | Auto-Heal: Fix Test Assertions ($HEALING_TYPE)"
               else
                 PR_TITLE="[RegressionAI] Auto-Heal: Fix Test Assertions ($HEALING_TYPE)"
               fi
