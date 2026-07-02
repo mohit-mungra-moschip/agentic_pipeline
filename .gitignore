@@ -47,3 +47,4 @@ lerna-debug.log*
 .env.production.local
 *.pem
 *.key
+job_log*.txt
