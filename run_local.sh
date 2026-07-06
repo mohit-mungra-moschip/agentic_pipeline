@@ -60,12 +60,19 @@ export RUN_ID
 # ── Step 2: Clone or update the test framework ────────────────────────────────
 echo ""
 echo "🔄 Setting up test framework..."
-if [ -d "test_framework/.git" ]; then
-  echo "   Test framework already cloned. Pulling latest..."
-  git -C test_framework pull origin main
+if [ -d "../agentic_pipeline_tests" ]; then
+  echo "   Found local test framework directory at ../agentic_pipeline_tests"
+  echo "   Creating symlink test_framework → ../agentic_pipeline_tests..."
+  rm -rf test_framework
+  ln -s ../agentic_pipeline_tests test_framework
 else
-  echo "   Cloning $TEST_REPO_URL → test_framework/"
-  git clone "$TEST_REPO_URL" test_framework
+  if [ -d "test_framework/.git" ]; then
+    echo "   Test framework already cloned. Pulling latest..."
+    git -C test_framework pull origin main
+  else
+    echo "   Cloning $TEST_REPO_URL → test_framework/"
+    git clone "$TEST_REPO_URL" test_framework
+  fi
 fi
 
 # ── Step 3: Install dependencies ─────────────────────────────────────────────
@@ -78,6 +85,7 @@ fi
 if [ -f test_framework/requirements.txt ]; then
   pip install -r test_framework/requirements.txt -q
 fi
+pip install pytest-json-report -q
 
 # ── Step 4: Clean pycache ────────────────────────────────────────────────────
 echo ""
