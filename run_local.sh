@@ -28,7 +28,6 @@ set -euo pipefail
 # ── Defaults ──────────────────────────────────────────────────────────────────
 MAX_ITER=3
 CREATE_JIRA=false
-TEST_REPO_URL="git@github.com:softnauticsgithub/agentic_solution_tests.git"
 RUN_ID="local-$(date +%Y%m%d-%H%M%S)"
 
 # ── Parse arguments ────────────────────────────────────────────────────────────
@@ -57,23 +56,6 @@ set +a
 export PYTHONPATH="."
 export RUN_ID
 
-# ── Step 2: Clone or update the test framework ────────────────────────────────
-echo ""
-echo "🔄 Setting up test framework..."
-if [ -d "../agentic_pipeline_tests" ]; then
-  echo "   Found local test framework directory at ../agentic_pipeline_tests"
-  echo "   Creating symlink test_framework → ../agentic_pipeline_tests..."
-  rm -rf test_framework
-  ln -s ../agentic_pipeline_tests test_framework
-else
-  if [ -d "test_framework/.git" ]; then
-    echo "   Test framework already cloned. Pulling latest..."
-    git -C test_framework pull origin main
-  else
-    echo "   Cloning $TEST_REPO_URL → test_framework/"
-    git clone "$TEST_REPO_URL" test_framework
-  fi
-fi
 
 # ── Step 3: Install dependencies ─────────────────────────────────────────────
 echo ""
