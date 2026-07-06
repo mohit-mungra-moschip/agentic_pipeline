@@ -65,6 +65,7 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/02_heal_test_assertions.sh
 
+  git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests commit -am "demo: sync tests" && git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests push origin main || true
   git commit -am "demo: trigger Scene 02" && git push origin main
 
 
@@ -147,6 +148,7 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/06_heal_mixed_combo.sh
 
+  git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests commit -am "demo: sync tests" && git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests push origin main || true
   git commit -am "demo: trigger Scene 06" && git push origin main
 
 
@@ -167,6 +169,7 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/07_fail_env_broken_db.sh
 
+  git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests commit -am "demo: sync tests" && git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests push origin main || true
   git commit -am "demo: trigger Scene 07" && git push origin main
 
 
@@ -206,6 +209,7 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/09_fail_mixed_combo.sh
 
+  git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests commit -am "demo: sync tests" && git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests push origin main || true
   git commit -am "demo: trigger Scene 09" && git push origin main
 
 
