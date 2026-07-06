@@ -14,7 +14,7 @@ THE GOLDEN RULE
 Every scene = same 3 steps:
   1. demo_reset.sh          ← always start clean
   2. [script_name].sh       ← apply the break
-  3. ./run_local.sh --create-jira true  ← trigger AI pipeline locally
+  3. Git commit & push      ← trigger GitHub Actions CI pipeline
 
 Quick verify break before pipeline (optional):
   cd /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests
@@ -45,7 +45,7 @@ SCRIPTS LOCATION
 bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
 bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/01_pass_baseline_green.sh
 
-./run_local.sh --create-jira true
+git commit -am "demo: trigger Scene 01" && git push origin main
 
 
 ================================================================================
@@ -65,7 +65,7 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/02_heal_test_assertions.sh
 
-  ./run_local.sh --create-jira true
+  git commit -am "demo: trigger Scene 02" && git push origin main
 
 
 ================================================================================
@@ -85,7 +85,7 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/03_heal_app_inverted_logic.sh
 
-  ./run_local.sh --create-jira true
+  git commit -am "demo: trigger Scene 03" && git push origin main
 
 
 ================================================================================
@@ -105,7 +105,7 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/04_heal_app_crud_pagination.sh
 
-  ./run_local.sh --create-jira true
+  git commit -am "demo: trigger Scene 04" && git push origin main
 
 
 ================================================================================
@@ -126,7 +126,7 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/05_heal_app_subtask_gate.sh
 
-  ./run_local.sh --create-jira true
+  git commit -am "demo: trigger Scene 05" && git push origin main
 
 
 ================================================================================
@@ -147,7 +147,7 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/06_heal_mixed_combo.sh
 
-  ./run_local.sh --create-jira true
+  git commit -am "demo: trigger Scene 06" && git push origin main
 
 
 ================================================================================
@@ -167,7 +167,7 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/07_fail_env_broken_db.sh
 
-  ./run_local.sh --create-jira true
+  git commit -am "demo: trigger Scene 07" && git push origin main
 
 
 ================================================================================
@@ -187,7 +187,7 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/08_fail_schema_mismatch.sh
 
-  ./run_local.sh --create-jira true
+  git commit -am "demo: trigger Scene 08" && git push origin main
 
 
 ================================================================================
@@ -206,7 +206,7 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/09_fail_mixed_combo.sh
 
-  ./run_local.sh --create-jira true
+  git commit -am "demo: trigger Scene 09" && git push origin main
 
 
 ================================================================================
