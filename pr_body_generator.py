@@ -196,6 +196,14 @@ def main():
 
     Path("reports/pr_body_tests.md").write_text("\n".join(body_tests), encoding="utf-8")
 
+    # Collect unique Jira ticket IDs for git branch/commit integration
+    jira_ids = []
+    for jr in (jira_healed + jira_unhealed):
+        jid = jr.get("jira_id")
+        if jid and jid not in jira_ids:
+            jira_ids.append(jid)
+    Path("reports/jira_keys.txt").write_text(" ".join(jira_ids), encoding="utf-8")
+
 
 if __name__ == "__main__":
     main()

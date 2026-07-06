@@ -72,8 +72,12 @@ fi
 echo ""
 echo "📦 Installing dependencies..."
 source .venv/bin/activate
-pip install -r requirements.txt -q
-pip install -r test_framework/requirements.txt -q
+if [ -f requirements.txt ]; then
+  pip install -r requirements.txt -q
+fi
+if [ -f test_framework/requirements.txt ]; then
+  pip install -r test_framework/requirements.txt -q
+fi
 
 # ── Step 4: Clean pycache ────────────────────────────────────────────────────
 echo ""
@@ -105,6 +109,18 @@ echo ""
 echo "📝 Generating PR descriptions..."
 python pr_body_generator.py
 
+# Read Jira keys
+JIRA_KEYS=""
+JIRA_KEYS_HYPHEN=""
+JIRA_KEYS_PR_TITLE=""
+if [ -f reports/jira_keys.txt ]; then
+  JIRA_KEYS=$(cat reports/jira_keys.txt)
+  if [ -n "$JIRA_KEYS" ]; then
+    JIRA_KEYS_HYPHEN="-$(echo "$JIRA_KEYS" | sed 's/ /-/g')"
+    JIRA_KEYS_PR_TITLE=" (${JIRA_KEYS})"
+  fi
+fi
+
 # ── Step 8: PR for App Changes ────────────────────────────────────────────────
 echo ""
 echo "🔍 Checking for App code changes..."
@@ -117,19 +133,33 @@ if [ -n "$APP_CHANGED" ]; then
   echo "   Files changed:"
   echo "$APP_CHANGED" | sed 's/^/   - /'
 
-  BRANCH_NAME="ai-fix/app-$RUN_ID"
+  BRANCH_NAME="ai-fix/app-$RUN_ID$JIRA_KEYS_HYPHEN"
   git config user.name "RegressionAI[local]"
   git config user.email "regressionai@local"
   git checkout -b "$BRANCH_NAME"
   git add -u app/
-  git commit -m "fix(ai): auto-healed application bug [$RUN_ID]"
+  
+  if [ -n "$JIRA_KEYS" ]; then
+    git commit -m "$JIRA_KEYS #in-review #comment fix(ai): auto-healed application bug [$RUN_ID]"
+  else
+    git commit -m "fix(ai): auto-healed application bug [$RUN_ID]"
+  fi
   git push origin "$BRANCH_NAME"
 
-  gh pr create \
-    --title "🤖 [RegressionAI] Auto-Heal: Fix Application Bugs" \
+  PR_URL=$(gh pr create \
+    --title "🤖 [RegressionAI] Auto-Heal: Fix Application Bugs$JIRA_KEYS_PR_TITLE" \
     --body-file reports/pr_body_app.md \
     --head "$BRANCH_NAME" \
-    --base main
+    --base main)
+  
+  PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+  if [ -n "$PR_NUM" ]; then
+    echo "🔄 Sleeping 5s before triggering sync..."
+    sleep 5
+    gh pr close "$PR_NUM"
+    gh pr reopen "$PR_NUM"
+    echo "✅ Webhook sync triggered successfully."
+  fi
 
   # Return to main for next check
   git checkout main
@@ -150,20 +180,45 @@ if [ -n "$TEST_CHANGED" ]; then
   echo "   Files changed:"
   echo "$TEST_CHANGED" | sed 's/^/   - /'
 
-  BRANCH_NAME="ai-fix/tests-$RUN_ID"
+  TEST_JIRA_KEYS=""
+  TEST_JIRA_KEYS_HYPHEN=""
+  TEST_JIRA_KEYS_PR_TITLE=""
+  if [ -f ../reports/jira_keys.txt ]; then
+    TEST_JIRA_KEYS=$(cat ../reports/jira_keys.txt)
+    if [ -n "$TEST_JIRA_KEYS" ]; then
+      TEST_JIRA_KEYS_HYPHEN="-$(echo "$TEST_JIRA_KEYS" | sed 's/ /-/g')"
+      TEST_JIRA_KEYS_PR_TITLE=" (${TEST_JIRA_KEYS})"
+    fi
+  fi
+
+  BRANCH_NAME="ai-fix/tests-$RUN_ID$TEST_JIRA_KEYS_HYPHEN"
   git config user.name "RegressionAI[local]"
   git config user.email "regressionai@local"
   git checkout -b "$BRANCH_NAME"
   git add -u tests/
-  git commit -m "test(ai): auto-healed test definitions [$RUN_ID]"
+  
+  if [ -n "$TEST_JIRA_KEYS" ]; then
+    git commit -m "$TEST_JIRA_KEYS #in-review #comment test(ai): auto-healed test definitions [$RUN_ID]"
+  else
+    git commit -m "test(ai): auto-healed test definitions [$RUN_ID]"
+  fi
   git push origin "$BRANCH_NAME"
 
-  gh pr create \
+  PR_URL=$(gh pr create \
     --repo "softnauticsgithub/agentic_solution_tests" \
-    --title "🤖 [RegressionAI] Auto-Heal: Fix Test Assertions" \
+    --title "🤖 [RegressionAI] Auto-Heal: Fix Test Assertions$TEST_JIRA_KEYS_PR_TITLE" \
     --body-file ../reports/pr_body_tests.md \
     --head "$BRANCH_NAME" \
-    --base main
+    --base main)
+
+  PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+  if [ -n "$PR_NUM" ]; then
+    echo "🔄 Sleeping 5s before triggering sync..."
+    sleep 5
+    gh pr close "$PR_NUM" --repo "softnauticsgithub/agentic_solution_tests"
+    gh pr reopen "$PR_NUM" --repo "softnauticsgithub/agentic_solution_tests"
+    echo "✅ Webhook sync triggered successfully."
+  fi
 else
   echo "   No healed changes found in Test repo."
 fi
