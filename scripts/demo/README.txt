@@ -70,7 +70,7 @@ Commands:
 
 ================================================================================
   SCENE 03 — APP HEAL: Inverted Email Guard Logic (Heal Pass)
-  Breaks:  TC-012, TC-013, TC-015 (cascading user creation failures)
+  Breaks:  TC-012 (targeted user creation failure)
   Files:   app/routers/users.py
   Heal:    APP_HEAL (heals by restoring the user check validation in app)
   Jira:    Created and updated to "IN REVIEW"
@@ -78,8 +78,8 @@ Commands:
 ================================================================================
 
 What breaks:
-  users.py: "if existing:" changed to "if not existing:"
-  Effect:   ALL new user registrations return 409 Conflict, blocking creation.
+  users.py: "if existing:" changed to "if not existing:" specifically for "alice@test.com"
+  Effect:   Registration of "alice@test.com" returns 409 Conflict, blocking creation.
 
 Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
@@ -140,7 +140,7 @@ Commands:
 What breaks (4 things):
   1. TC-030: wrong enum string "in-progress" (test file assertion error)
   2. TC-037: wrong threshold > 100 (test file assertion error)
-  3. users.py: inverted email validation check (app router bug)
+  3. users.py: inverted email validation check for "alice@test.com" (app router bug)
   4. crud.py: offset(limit) instead of offset(skip) (app database queries bug)
 
 Commands:
@@ -172,7 +172,7 @@ Commands:
 
 ================================================================================
   SCENE 08 — SCHEMA BREAK: DB Schema Mismatch (Heal Fail)
-  Breaks:  TC-001 (task creation crashes due to model column renamed)
+  Breaks:  TC-103 (task creation crashes due to due_date model column renamed)
   Files:   app/models.py
   Heal:    NONE (AI attempts healing app code, but database schema requires migration)
   Jira:    Created and left in "TODO" status
@@ -180,8 +180,8 @@ Commands:
 ================================================================================
 
 What breaks:
-  models.py: Task.title column renamed to Task.task_title
-  Effect:  Task creation endpoint returns 500 Internal Server Error due to model.
+  models.py: Task.due_date column renamed to Task.task_due_date
+  Effect:  Task creation with due_date fails validation/database mapping.
 
 Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
@@ -200,7 +200,7 @@ Commands:
 
 What breaks (2 things):
   1. test_api_tasks.py: broken PostgreSQL URL (ENV_ISSUE)
-  2. models.py: column renamed (APP_BUG — healing fails validation)
+  2. models.py: Task.due_date column renamed (APP_BUG — healing fails validation)
 
 Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh

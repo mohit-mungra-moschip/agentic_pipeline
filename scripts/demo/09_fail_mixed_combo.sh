@@ -24,8 +24,8 @@ python3 - <<'PYEOF'
 filepath = "app/models.py"
 with open(filepath, "r") as f:
     content = f.read()
-old = '    title = Column(String(500), nullable=False)'
-new = '    task_title = Column(String(500), nullable=False)'
+old = '    due_date = Column(DateTime(timezone=True), nullable=True)'
+new = '    task_due_date = Column(DateTime(timezone=True), nullable=True)'
 if old in content:
     content = content.replace(old, new, 1)
     with open(filepath, "w") as f:
