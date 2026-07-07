@@ -219,7 +219,7 @@ jobs:
                 JIRA_BRANCH_PREFIX="${JIRA_BRANCH_PREFIX}-"
               fi
 
-              BRANCH_NAME="ai-fix/${JIRA_BRANCH_PREFIX}app"
+              BRANCH_NAME="${JIRA_BRANCH_PREFIX}ai-fix-app"
               git checkout -b "$BRANCH_NAME"
               git add -u app/
               # Include Jira IDs in the commit message for traceability + Smart Commit transition
@@ -234,7 +234,7 @@ jobs:
               # Build PR title with Jira IDs
               JIRA_IDS="${{ steps.ai_pipeline.outputs.jira_ids }}"
               if [ -n "$JIRA_IDS" ]; then
-                PR_TITLE="[RegressionAI] $JIRA_IDS | Auto-Heal: Fix Application Bugs ($HEALING_TYPE)"
+                PR_TITLE="$JIRA_IDS | [RegressionAI] Auto-Heal: Fix Application Bugs ($HEALING_TYPE)"
               else
                 PR_TITLE="[RegressionAI] Auto-Heal: Fix Application Bugs ($HEALING_TYPE)"
               fi
@@ -294,7 +294,7 @@ jobs:
                 JIRA_BRANCH_PREFIX="${JIRA_BRANCH_PREFIX}-"
               fi
 
-              BRANCH_NAME="ai-fix/${JIRA_BRANCH_PREFIX}tests"
+              BRANCH_NAME="${JIRA_BRANCH_PREFIX}ai-fix-tests"
               git checkout -b "$BRANCH_NAME"
               # Stage only modified tracked .py files — not new untracked pycache
               git add -u tests/
@@ -310,7 +310,7 @@ jobs:
               # Build PR title with Jira IDs
               JIRA_IDS="${{ steps.ai_pipeline.outputs.jira_ids }}"
               if [ -n "$JIRA_IDS" ]; then
-                PR_TITLE="[RegressionAI] $JIRA_IDS | Auto-Heal: Fix Test Assertions ($HEALING_TYPE)"
+                PR_TITLE="$JIRA_IDS | [RegressionAI] Auto-Heal: Fix Test Assertions ($HEALING_TYPE)"
               else
                 PR_TITLE="[RegressionAI] Auto-Heal: Fix Test Assertions ($HEALING_TYPE)"
               fi
