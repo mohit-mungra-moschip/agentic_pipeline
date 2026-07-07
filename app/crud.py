@@ -4,6 +4,7 @@ app/crud.py — Database CRUD operations for the Task Manager application.
 from typing import List, Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import HTTPException
 
 from app import models, schemas
 
@@ -126,6 +127,21 @@ async def update_task(db: AsyncSession, task_id: int, data: schemas.TaskUpdate) 
     db_task = await get_task(db, task_id)
     if not db_task:
         return None
+    # Prevent marking a parent task as DONE if it has open subtasks
+    if data.status == models.TaskStatus.DONE and db_task.status != models.TaskStatus.DONE:
+        open_subtasks_stmt = select(models.Task).where(
+            models.Task.parent_id == task_id,
+            models.Task.status.in_([models.TaskStatus.TODO, models.TaskStatus.IN_PROGRESS])
+        )
+        result = await db.execute(open_subtasks_stmt)
+        open_subtasks = result.scalars().all()
+
+        if open_subtasks:
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot mark task as done because subtasks are still open"
+            )
+
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(db_task, field, value)
     await db.flush()
