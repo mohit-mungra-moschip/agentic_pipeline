@@ -20,7 +20,15 @@ async def list_tasks(
     status: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud.get_tasks(db, skip=skip, limit=limit, project_id=project_id, status=status)
+    query = select(models.Task).offset(skip).limit(limit)
+    if project_id:
+        query = query.where(models.Task.project_id == project_id)
+    if status:
+        query = query.where(models.Task.status == status)
+        
+    result = await db.execute(query)
+    tasks = result.scalars().all()
+    return tasks
 
 
 @router.post("/", response_model=schemas.TaskOut, status_code=201)

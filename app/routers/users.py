@@ -17,9 +17,7 @@ async def list_users(skip: int = 0, limit: int = 100, db: AsyncSession = Depends
 @router.post("/", response_model=schemas.UserOut, status_code=201)
 async def create_user(user: schemas.UserCreate, db: AsyncSession = Depends(get_db)):
     existing = await crud.get_user_by_email(db, user.email)
-    if user.email == "alice@test.com" and not existing:
-        raise HTTPException(status_code=409, detail="Email already registered")
-    elif user.email != "alice@test.com" and existing:
+    if existing:
         raise HTTPException(status_code=409, detail="Email already registered")
     return await crud.create_user(db, user)
 
