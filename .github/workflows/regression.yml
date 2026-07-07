@@ -153,6 +153,8 @@ jobs:
           CREATE_JIRA: ${{ inputs.create_jira_tickets || 'false' }}
           MAX_HEAL_ITER: ${{ inputs.max_healing_iterations || '3' }}
           ENABLE_SELF_HEALING: ${{ inputs.enable_self_healing != false }}
+          SELF_HEALING_MODEL: "google/gemini-2.5-flash"
+          ADVANCED_HEALING_MODEL: "google/gemini-2.5-flash"
           PYTHONPATH: .
         run: |
           source .venv/bin/activate
