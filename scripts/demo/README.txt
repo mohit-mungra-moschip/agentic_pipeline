@@ -79,8 +79,8 @@ Commands:
 ================================================================================
 
 What breaks:
-  users.py: "if existing:" changed to "if not existing:" specifically for "alice@test.com"
-  Effect:   Registration of "alice@test.com" returns 409 Conflict, blocking creation.
+  users.py: "if existing:" changed to "if not existing:" (logic inversion)
+  Effect:   Registration check is inverted, raising 409 Conflict when the user does not exist.
 
 Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
@@ -141,7 +141,7 @@ Commands:
 What breaks (4 things):
   1. TC-030: wrong enum string "in-progress" (test file assertion error)
   2. TC-037: wrong threshold > 100 (test file assertion error)
-  3. users.py: inverted email validation check for "alice@test.com" (app router bug)
+  3. users.py: inverted email validation check (app router bug)
   4. crud.py: offset(limit) instead of offset(skip) (app database queries bug)
 
 Commands:
