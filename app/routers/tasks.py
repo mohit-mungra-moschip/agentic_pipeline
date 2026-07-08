@@ -97,7 +97,7 @@ async def update_task(task_id: int, data: schemas.TaskUpdate, db: AsyncSession =
 
 
     # If setting to DONE, check subtasks
-    if data.status == schemas.TaskStatus.DONE:
+    if data.status == schemas.TaskStatus.DONE and task.status != schemas.TaskStatus.DONE:
         result = await db.execute(select(models.Task).where(models.Task.parent_id == task_id))
         subtasks = list(result.scalars().all())
         for sub in subtasks:
