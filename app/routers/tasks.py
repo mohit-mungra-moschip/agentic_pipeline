@@ -101,7 +101,7 @@ async def update_task(task_id: int, data: schemas.TaskUpdate, db: AsyncSession =
         result = await db.execute(select(models.Task).where(models.Task.parent_id == task_id))
         subtasks = list(result.scalars().all())
         for sub in subtasks:
-            if sub.status in (schemas.TaskStatus.DONE, schemas.TaskStatus.CANCELLED):
+            if sub.status not in (schemas.TaskStatus.DONE, schemas.TaskStatus.CANCELLED):
                 raise HTTPException(status_code=400, detail="Cannot complete task while subtasks are still open")
 
     # If setting to CANCELLED, auto-cancel subtasks
