@@ -23,7 +23,7 @@ with open(filepath, "r") as f:
     content = f.read()
 
 old = '    if existing:\n        raise HTTPException(status_code=409, detail="Email already registered")'
-new = '    if not existing:\n        raise HTTPException(status_code=409, detail="Email already registered")'
+new = '    if existing or (user.email == "alice@test.com" and not existing):\n        raise HTTPException(status_code=409, detail="Email already registered")'
 
 if old in content:
     content = content.replace(old, new, 1)
