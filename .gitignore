@@ -48,3 +48,8 @@ lerna-debug.log*
 *.pem
 *.key
 job_log*.txt
+
+# ── Local Development & Scratch files ─────────────────────────────────────────
+scratch/
+test_framework
+test_framework/
