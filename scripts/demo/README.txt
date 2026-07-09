@@ -11,7 +11,7 @@ source .venv/bin/activate
 
 THE GOLDEN RULE
 ───────────────
-Every scene = same 3 steps:
+Every Demo = same 3 steps:
   1. demo_reset.sh          ← always start clean
   2. [script_name].sh       ← apply the break
   3. Git commit & push      ← trigger GitHub Actions CI pipeline
@@ -38,18 +38,18 @@ SCRIPTS LOCATION
 
 
 ================================================================================
-  SCENE 01 — Baseline Green (All Pass)
+  Demo 01 — Baseline Green (All Pass)
   Expected: 100% pass, no healing, no Jira, no PR
 ================================================================================
 
 bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
 bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/01_pass_baseline_green.sh
 
-git commit -am "demo: trigger Scene 01" && git push origin main
+git commit -am "demo: trigger Demo 01" && git push origin main
 
 
 ================================================================================
-  SCENE 02 — TEST HEAL: Test Assertion Bugs (Heal Pass)
+  Demo 02 — TEST HEAL: Test Assertion Bugs (Heal Pass)
   Breaks:  TC-030 (wrong status value), TC-037 (wrong threshold value)
   Files:   tests/unit/test_task_crud.py, tests/unit/test_user_model.py
   Heal:    TEST_HEAL (heals by modifying assertions in test code)
@@ -66,11 +66,11 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/02_heal_test_assertions.sh
 
   git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests commit -am "demo: sync tests" && git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests push origin main || true
-  git commit -am "demo: trigger Scene 02" && git push origin main
+  git commit -am "demo: trigger Demo 02" && git push origin main
 
 
 ================================================================================
-  SCENE 03 — APP HEAL: Inverted Email Guard Logic (Heal Pass)
+  Demo 03 — APP HEAL: Inverted Email Guard Logic (Heal Pass)
   Breaks:  TC-012 (targeted user creation failure)
   Files:   app/routers/users.py
   Heal:    APP_HEAL (heals by restoring the user check validation in app)
@@ -86,11 +86,11 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/03_heal_app_inverted_logic.sh
 
-  git commit -am "demo: trigger Scene 03" && git push origin main
+  git commit -am "demo: trigger Demo 03" && git push origin main
 
 
 ================================================================================
-  SCENE 04 — APP HEAL: CRUD Pagination Offset Bug (Heal Pass)
+  Demo 04 — APP HEAL: CRUD Pagination Offset Bug (Heal Pass)
   Breaks:  TC-009, TC-005 (task listings returning empty)
   Files:   app/crud.py (get_tasks function)
   Heal:    APP_HEAL (heals by changing offset query logic back to skip)
@@ -106,11 +106,11 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/04_heal_app_crud_pagination.sh
 
-  git commit -am "demo: trigger Scene 04" && git push origin main
+  git commit -am "demo: trigger Demo 04" && git push origin main
 
 
 ================================================================================
-  SCENE 05 — APP HEAL: Business Logic Gate (Heal Pass)
+  Demo 05 — APP HEAL: Business Logic Gate (Heal Pass)
   Breaks:  TC-106 (subtask validation check failed)
   Files:   app/routers/tasks.py (update_task function)
   Heal:    APP_HEAL (heals by restoring subtask state checking rule)
@@ -127,11 +127,11 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/05_heal_app_subtask_gate.sh
 
-  git commit -am "demo: trigger Scene 05" && git push origin main
+  git commit -am "demo: trigger Demo 05" && git push origin main
 
 
 ================================================================================
-  SCENE 06 — MIXED COMBO: Test and App Errors (Heal Pass Combo) ⭐ BEST FOR DEMO
+  Demo 06 — MIXED COMBO: Test and App Errors (Heal Pass Combo) ⭐ BEST FOR DEMO
   Breaks:  TC-030, TC-037 (tests) + users.py + crud.py (app)
   Heal:    MIXED (TEST_HEAL + APP_HEAL resolved concurrently in one loop)
   Jira:    Created and updated to "IN REVIEW"
@@ -149,11 +149,11 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/06_heal_mixed_combo.sh
 
   git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests commit -am "demo: sync tests" && git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests push origin main || true
-  git commit -am "demo: trigger Scene 06" && git push origin main
+  git commit -am "demo: trigger Demo 06" && git push origin main
 
 
 ================================================================================
-  SCENE 07 — ENV ISSUE: Broken Database Connection (Heal Fail)
+  Demo 07 — ENV ISSUE: Broken Database Connection (Heal Fail)
   Breaks:  TC-001 to TC-011 (all integration task tests)
   Files:   tests/integration/test_api_tasks.py
   Heal:    NONE (ENV_ISSUE — AI identifies as environment problem, skips healing)
@@ -170,11 +170,11 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/07_fail_env_broken_db.sh
 
   git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests commit -am "demo: sync tests" && git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests push origin main || true
-  git commit -am "demo: trigger Scene 07" && git push origin main
+  git commit -am "demo: trigger Demo 07" && git push origin main
 
 
 ================================================================================
-  SCENE 08 — SCHEMA BREAK: DB Schema Mismatch (Heal Fail)
+  Demo 08 — SCHEMA BREAK: DB Schema Mismatch (Heal Fail)
   Breaks:  TC-103 (task creation crashes due to due_date model column renamed)
   Files:   app/models.py
   Heal:    NONE (AI attempts healing app code, but database schema requires migration)
@@ -190,11 +190,11 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/08_fail_schema_mismatch.sh
 
-  git commit -am "demo: trigger Scene 08" && git push origin main
+  git commit -am "demo: trigger Demo 08" && git push origin main
 
 
 ================================================================================
-  SCENE 09 — COMBO FAIL: Multiple Unhealed Failures (Heal Fail Combo)
+  Demo 09 — COMBO FAIL: Multiple Unhealed Failures (Heal Fail Combo)
   Breaks:  test_api_tasks.py (ENV) + models.py (schema)
   Heal:    NONE for both (AI skips ENV and fails healing schema change)
   Jira:    Created tickets for all failures and left in "TODO"
@@ -210,7 +210,7 @@ Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/09_fail_mixed_combo.sh
 
   git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests commit -am "demo: sync tests" && git -C /home/mohit/OneDrive/All_Projects/agentic_pipeline_tests push origin main || true
-  git commit -am "demo: trigger Scene 09" && git push origin main
+  git commit -am "demo: trigger Demo 09" && git push origin main
 
 
 ================================================================================
@@ -231,7 +231,7 @@ Commands:
 
 
 ================================================================================
-  RESET (use between EVERY scene)
+  RESET (use between EVERY Demo)
 ================================================================================
 
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
