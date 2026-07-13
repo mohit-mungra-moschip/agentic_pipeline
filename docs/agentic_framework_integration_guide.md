@@ -128,7 +128,48 @@ If your application files or test files are in different directories (e.g. `src/
 
 ---
 
-## 🔀 5. CI/CD Orchestration (GitHub Actions)
+## 🔗 5. GitHub Cloning and Repository Strategy (Monorepo vs. Multi-Repo)
+
+Depending on your engineering setup, you can run the self-healing framework in either a **Monorepo** or a **Multi-Repo (split App & Tests)** configuration.
+
+### Option A: Monorepo Setup (Recommended & Simplest)
+If your application code and your test suites live in the **same GitHub repository**:
+1. **No Extra Tokens needed**: You do not need a custom `TEST_REPO_TOKEN` or a separate checkout step in your GitHub Actions workflow.
+2. **Simplified Pathing**: Place your test files in a standard `tests/` directory at the root. No need to clone into a `test_framework` path.
+3. **Single PR Creation**: If the AI heals test assertions or application code, both types of fixes can be committed to the same branch and raised in a single PR using the default `secrets.GITHUB_TOKEN`.
+4. **Code Adjustments**:
+   - In `regression_runner.py` (line 395), simplify the fallback repo check:
+     ```python
+     repo = "your-single-repository"
+     ```
+
+### Option B: Multi-Repo Setup (Split App and QA Test Repositories)
+If your QA test automation suites live in a **separate repository** from your main application (matching this project's current structure):
+1. **Create Personal Access Token (PAT)**: Create a GitHub PAT with `repo` scopes that has access to both repositories.
+2. **Set up GitHub Secrets**:
+   - Add the PAT as a repository secret in your Application repository named `TEST_REPO_TOKEN`.
+3. **Cloning during Action execution**:
+   - Configure the checkout step in your Application workflow to pull the test repository:
+     ```yaml
+     - name: Checkout Test Repository
+       uses: actions/checkout@v4
+       with:
+         repository: 'your-organization/your-tests-repository'
+         token: ${{ secrets.TEST_REPO_TOKEN }}
+         path: test_framework
+     ```
+4. **Action Target updates**:
+   - **For App Fixes**: Commit changes inside the root directory and create the PR targeting the main repository using `secrets.GITHUB_TOKEN`.
+   - **For QA Test Fixes**: Run commands inside the `test_framework` directory (`cd test_framework`), commit/push the branch, and create the PR targeting the test repository using `secrets.TEST_REPO_TOKEN` as the auth token.
+5. **Code Adjustments**:
+   - In `regression_runner.py` (line 395), update the repository names to match your own:
+     ```python
+     repo = "your-tests-repository" if h_type == "TEST_HEAL" else "your-app-repository"
+     ```
+
+---
+
+## 🔀 6. CI/CD Orchestration (GitHub Actions)
 
 Copy and adapt `.github/workflows/regression.yml` to trigger the pipeline automatically when code is pushed or a test suite fails. 
 
@@ -164,7 +205,7 @@ The workflow needs to:
 
 ---
 
-## ✅ 6. Integration Verification Checklist
+## ✅ 7. Integration Verification Checklist
 
 To verify that your integration is successful:
 - [ ] Run `pytest` locally to confirm `logs/test-results.xml` is generated with `conftest.py` active.
