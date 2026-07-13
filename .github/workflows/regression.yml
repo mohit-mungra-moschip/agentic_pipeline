@@ -364,7 +364,6 @@ jobs:
               sys.exit(0)
 
           # Write to GitHub Step Summary
-          ghs = Path(open("/proc/1/environ", "rb").read().decode(errors="replace").split("\0"))
           step_summary = None
           try:
               import os
