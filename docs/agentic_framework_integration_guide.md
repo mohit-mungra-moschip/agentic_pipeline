@@ -131,6 +131,12 @@ The framework is configured to route `ENV_ISSUE` failures through the self-heali
 * If the configuration is healed successfully and passes sandbox testing, it is checked in, and any associated `ENV_ISSUE` warnings are filtered out from the final unresolved list.
 * If the failure is a true infrastructure outage (e.g., database service is offline) that cannot be healed by changing configuration code, the healing run will fail verification, and a Jira remediation task ticket will be raised for manual intervention.
 
+### E. Define Project-Specific Prompt Rules (`project_rules.md`)
+To keep the framework's core LLM prompts fully generic and reusable across any software project, project-specific rules are separated from the main codebase.
+1. Create a `project_rules.md` file in the root of your target project.
+2. Write any project-specific guidelines or constraints (e.g., "Do not delete the 'client' fixture", "Ensure FastAPI routes are decorated with async", database restrictions, etc.) in this file.
+3. The self-healing agent will automatically detect and load this file, appending it to the core instructions dynamically. If the file is not present, the agent falls back to pure generic instructions.
+
 ---
 
 ## 🔗 5. GitHub Cloning and Repository Strategy (Monorepo vs. Multi-Repo)
