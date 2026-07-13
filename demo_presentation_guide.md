@@ -115,26 +115,18 @@ graph TD
     E --> F{Failure Type?}
     
     F -- TEST_BUG --> G[Edit Test Code]
-    G --> H[Re-run tests in Sandbox]
-    H --> I{Pass?}
-    I -- Yes --> J[TEST_HEAL: Create QA PR & Jira IN REVIEW]
-    I -- No --> E
+    F -- APP_BUG --> H[Edit App Code]
+    F -- ENV_ISSUE --> I[Attempt Auto-Heal Config]
+    F -- SCHEMA / UNKNOWN --> J[Attempt Code Fix]
     
-    F -- APP_BUG --> K[Edit App Code]
-    K --> L[Re-run FULL suite]
-    L --> M{Pass?}
-    M -- Yes --> N[APP_HEAL: Create Dev PR & Jira IN REVIEW]
-    M -- No --> E
+    G --> K[Re-run suite]
+    H --> K
+    I --> K
+    J --> K
     
-    F -- ENV_ISSUE --> O[Attempt Auto-Heal Code Config/URL]
-    O --> P[Re-run tests in Sandbox]
-    P --> Q{Pass?}
-    Q -- Yes --> R[Create PR & Jira IN REVIEW]
-    Q -- No --> S[Create Jira TODO - Assign to DevOps/Infra]
-    
-    F -- SCHEMA / UNKNOWN --> T[Attempt Code Fix]
-    T --> U[Re-run tests in Sandbox]
-    U --> V{Pass?}
-    V -- Yes --> W[Create PR & Jira IN REVIEW]
-    V -- No --> E
+    K --> L{Pass?}
+    L -- Yes --> M[Create PR & Jira IN REVIEW]
+    L -- No --> N{Max attempts reached?}
+    N -- No --> E
+    N -- Yes --> O[Create Jira TODO]
 ```
