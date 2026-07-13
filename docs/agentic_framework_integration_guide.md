@@ -13,10 +13,10 @@ graph TD
     pytest[pytest Run] --> conftest[conftest.py Hook]
     conftest --> log[Write Test Failures to Logs]
     log --> runner[regression_runner.py]
-    runner --> graph[LangGraph State Machine]
+    runner --> stateGraph[LangGraph State Machine]
     
     subgraph LangGraph AI Nodes
-        graph --> N2[Parse Failures]
+        stateGraph --> N2[Parse Failures]
         N2 --> N3[Fetch Code Files]
         N3 --> N4[LLM Failure Analysis]
         N4 --> N5[Git Blame Root Cause]
