@@ -109,27 +109,32 @@ Here is exactly what breaks, why it fails, how the AI heals it, and the resultin
 graph TD
     A[Run pytest] --> B{Any Test Failed?}
     B -- No --> C[Report 100% Pass]
-    B -- Yes --> D[Failure Parsing & LLM Analysis]
+    B -- Yes --> D[Failure Parsing]
+    D --> E[LLM Failure Analysis]
     
-    D --> E{Failure Type?}
+    E --> F{Failure Type?}
     
-    E -- TEST_BUG --> F[Edit Test Code]
-    F --> G[Re-run tests]
-    G --> H{Pass?}
-    H -- Yes --> I[TEST_HEAL: Create QA PR & Jira IN REVIEW]
+    F -- TEST_BUG --> G[Edit Test Code]
+    G --> H[Re-run tests in Sandbox]
+    H --> I{Pass?}
+    I -- Yes --> J[TEST_HEAL: Create QA PR & Jira IN REVIEW]
+    I -- No --> E
     
-    E -- APP_BUG --> J[Edit App Code]
-    J --> K[Re-run FULL suite]
-    K --> L{Pass?}
-    L -- Yes --> M[APP_HEAL: Create Dev PR & Jira IN REVIEW]
+    F -- APP_BUG --> K[Edit App Code]
+    K --> L[Re-run FULL suite]
+    L --> M{Pass?}
+    M -- Yes --> N[APP_HEAL: Create Dev PR & Jira IN REVIEW]
+    M -- No --> E
     
-    E -- ENV_ISSUE --> N[Attempt Auto-Heal Code Config/URL]
-    N --> N2[Re-run tests]
-    N2 --> N3{Pass?}
-    N3 -- Yes --> I
-    N3 -- No --> O[Create Jira TODO - Assign to DevOps/Infra]
+    F -- ENV_ISSUE --> O[Attempt Auto-Heal Code Config/URL]
+    O --> P[Re-run tests in Sandbox]
+    P --> Q{Pass?}
+    Q -- Yes --> R[Create PR & Jira IN REVIEW]
+    Q -- No --> S[Create Jira TODO - Assign to DevOps/Infra]
     
-    E -- SCHEMA / UNKNOWN --> P[Attempt Code Fix]
-    P --> Q{Heal Failed/Max Iterations?}
-    Q -- Yes --> R[Escalate: Create Jira TODO - Assign to Dev]
+    F -- SCHEMA / UNKNOWN --> T[Attempt Code Fix]
+    T --> U[Re-run tests in Sandbox]
+    U --> V{Pass?}
+    V -- Yes --> W[Create PR & Jira IN REVIEW]
+    V -- No --> E
 ```
