@@ -79,12 +79,12 @@ Here is exactly what breaks, why it fails, how the AI heals it, and the resultin
 * **Healing Type**: `MIXED`.
 * **Result**: Heals both repositories concurrently, creates corresponding **Jira tickets**, and opens **two Pull Requests** (one for Dev and one for QA).
 
-### 🔴 Demo 07: ENV ISSUE — Broken Database Connection (Heal Fail)
+### 🟢 Demo 07: ENV ISSUE — Auto-Healed Database Connection Configuration
 * **What breaks**:
-  * The environment database connection is intentionally broken (e.g., pointing database URL to an invalid/non-existent endpoint).
-* **AI Action**: Classifies the failures as `ENV_ISSUE` (since the database connection is refused/down). AI correctly recognizes that changing code will not resolve the issue.
-* **Healing Type**: `NONE` (skips healing to prevent editing code for environmental problems).
-* **Result**: Leaves the status as **FAILED**, creates a **Jira ticket (TODO)** flagged as an Environment/Infrastructure blocker for human intervention.
+  * The environment database connection URL in `test_api_tasks.py` is broken (pointing to a nonexistent PostgreSQL host).
+* **AI Action**: Classifies the failure as `ENV_ISSUE`. Instead of skipping, the self-healing agent attempts to heal it in the sandbox in case it is a file-based configuration string error.
+* **Healing Type**: `TEST_HEAL` (heals the database URL back to a valid local SQLite memory endpoint).
+* **Result**: Passes sandbox verification, opens a **Pull Request** updating the test configuration, and creates a **Jira ticket (IN REVIEW)**. If it were a true infrastructure outage (e.g. actual DB service down) that could not be solved by code config, it would fallback to FAILED and open a Jira TODO task ticket for DevOps/Infra intervention.
 
 ### 🔴 Demo 08: SCHEMA BREAK — DB Schema Mismatch (Heal Fail)
 * **What breaks**:
@@ -123,8 +123,11 @@ graph TD
     K --> L{Pass?}
     L -- Yes --> M[APP_HEAL: Create Dev PR & Jira IN REVIEW]
     
-    E -- ENV_ISSUE --> N[Classify Env Issue: Skip Healing]
-    N --> O[Create Jira TODO - Assign to DevOps/Infra]
+    E -- ENV_ISSUE --> N[Attempt Auto-Heal Code Config/URL]
+    N --> N2[Re-run tests]
+    N2 --> N3{Pass?}
+    N3 -- Yes --> I
+    N3 -- No --> O[Create Jira TODO - Assign to DevOps/Infra]
     
     E -- SCHEMA / UNKNOWN --> P[Attempt Code Fix]
     P --> Q{Heal Failed/Max Iterations?}
