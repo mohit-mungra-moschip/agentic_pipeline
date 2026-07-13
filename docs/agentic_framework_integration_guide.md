@@ -126,6 +126,11 @@ If you run tests in a different way (e.g. using specific markers or path names),
 ### C. Adjust Agent Paths in `RegressionAI/skills/code_editors.py`
 If your application files or test files are in different directories (e.g. `src/` instead of `app/` or `tests/`), update the directory search paths in `node_3_fetch_files.py` and `node_6_self_healing.py` so the LLM can find and edit them.
 
+### D. Self-Healing for Environment Configs (ENV_ISSUE)
+The framework is configured to route `ENV_ISSUE` failures through the self-healing sandbox. This ensures that environment-related failures caused by code-based configurations (such as incorrect database connection strings, outdated environment variables, or broken API URLs in test/config files) can be auto-healed like standard test or app bugs.
+* If the configuration is healed successfully and passes sandbox testing, it is checked in, and any associated `ENV_ISSUE` warnings are filtered out from the final unresolved list.
+* If the failure is a true infrastructure outage (e.g., database service is offline) that cannot be healed by changing configuration code, the healing run will fail verification, and a Jira remediation task ticket will be raised for manual intervention.
+
 ---
 
 ## 🔗 5. GitHub Cloning and Repository Strategy (Monorepo vs. Multi-Repo)
