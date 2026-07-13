@@ -103,7 +103,7 @@ Here is exactly what breaks, why it fails, how the AI heals it, and the resultin
 
 ## 📈 4. The Self-Healing Decision Matrix
 
-![AI Self-Healing Decision Matrix Flowchart](/home/mohit/.gemini/antigravity/brain/73a9bd67-9579-432e-ac41-2e8abfd045c2/self_healing_matrix_1783916404131.png)
+![AI Self-Healing Decision Matrix Flowchart](docs/images/self_healing_decision_matrix.png)
 
 ```mermaid
 graph TD
