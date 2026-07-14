@@ -110,7 +110,7 @@ async def get_tasks(
         query = query.where(models.Task.project_id == project_id)
     if status is not None:
         query = query.where(models.Task.status == status)
-    result = await db.execute(query.offset(limit).limit(limit))
+    result = await db.execute(query.offset(skip).limit(limit))
     return list(result.scalars().all())
 
 
