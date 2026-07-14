@@ -206,8 +206,9 @@ jobs:
           if [[ "$HEALING_TYPE" == "APP_HEAL" || "$HEALING_TYPE" == "MIXED" ]]; then
             find app/ -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
             find app/ -type f -name "*.pyc" -delete 2>/dev/null || true
-            if [ -n "$(git diff --name-only app/ | grep '\.py$')" ]; then
-              echo "✨ Found healed changes in App code ($HEALING_TYPE). Creating branch and PR..."
+            CHANGED=$(git diff --name-only | grep -E '(app/.*\.py|requirements\.txt|pyproject\.toml|setup\.py)$' || true)
+            if [ -n "$CHANGED" ]; then
+              echo "✨ Found healed changes in App code or dependencies ($HEALING_TYPE). Creating branch and PR..."
               git config --global user.name "github-actions[bot]"
               git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -223,7 +224,7 @@ jobs:
 
               BRANCH_NAME="${JIRA_BRANCH_PREFIX}ai-fix-app"
               git checkout -b "$BRANCH_NAME"
-              git add -u app/
+              git add -u
               # Include Jira IDs in the commit message for traceability + Smart Commit transition
               if [ -n "$JIRA_IDS" ]; then
                 JIRA_KEYS_LIST=$(echo "$JIRA_IDS" | tr ',' ' ' | tr -s ' ')
@@ -279,10 +280,10 @@ jobs:
             # Purge all __pycache__ and .pyc files — they must never appear in the diff
             find tests/ -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
             find tests/ -type f -name "*.pyc" -delete 2>/dev/null || true
-            # Only open a PR if actual .py test files were modified (not new untracked files)
-            CHANGED=$(git diff --name-only tests/ | grep '\.py$' || true)
+            # Only open a PR if actual test files or dependency/config files were modified
+            CHANGED=$(git diff --name-only | grep -E '(tests/.*\.py|requirements\.txt|pyproject\.toml|setup\.py)$' || true)
             if [ -n "$CHANGED" ]; then
-              echo "✨ Found healed changes in Test code ($HEALING_TYPE). Creating branch and PR..."
+              echo "✨ Found healed changes in Test framework ($HEALING_TYPE). Creating branch and PR..."
               git config --global user.name "github-actions[bot]"
               git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -298,8 +299,8 @@ jobs:
 
               BRANCH_NAME="${JIRA_BRANCH_PREFIX}ai-fix-tests"
               git checkout -b "$BRANCH_NAME"
-              # Stage only modified tracked .py files — not new untracked pycache
-              git add -u tests/
+              # Stage only modified tracked files matching our patterns
+              git add -u
               # Include Jira IDs in the commit message for traceability + Smart Commit transition
               if [ -n "$JIRA_IDS" ]; then
                 JIRA_KEYS_LIST=$(echo "$JIRA_IDS" | tr ',' ' ' | tr -s ' ')
