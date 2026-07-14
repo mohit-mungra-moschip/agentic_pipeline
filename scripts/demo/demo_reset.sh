@@ -17,12 +17,18 @@ fi
 
 # 2. Reset Test repository and push clean state to remote
 cd "$TEST_DIR"
-git checkout f8fc398 -- tests/
-if ! git diff --quiet tests/; then
+git checkout f8fc398 -- tests/ requirements.txt
+if ! git diff --quiet tests/ requirements.txt; then
   git commit -am "demo: reset tests to clean state" && git push origin main || true
-  echo "✅  tests/ restored & synced to remote"
+  echo "✅  tests/ and requirements.txt restored & synced to remote"
 else
-  echo "✅  tests/ already clean"
+  echo "✅  tests/ and requirements.txt already clean"
+fi
+
+if [ -d ".venv" ]; then
+  .venv/bin/pip install -r requirements.txt || true
+elif [ -d "../.venv" ]; then
+  ../.venv/bin/pip install -r requirements.txt || true
 fi
 
 echo "✅  Reset complete."

@@ -153,17 +153,17 @@ Commands:
 
 
 ================================================================================
-  Demo 07 — ENV ISSUE: Auto-Healed Database Connection Configuration
-  Breaks:  TC-001 to TC-011 (all integration task tests due to broken DB host)
-  Files:   tests/integration/test_api_tasks.py
-  Heal:    ENV_ISSUE (AI fixes URL path back to a local SQLite memory endpoint)
+  Demo 07 — ENV ISSUE: Auto-Healed Missing Package Dependency
+  Breaks:  TC-001 to TC-011 (all integration task tests due to missing aiosqlite package)
+  Files:   requirements.txt
+  Heal:    ENV_ISSUE (AI adds missing package back to requirements.txt)
   Jira:    Created and updated to "IN REVIEW"
   PR:      Created automatically (Dev / QA branch)
 ================================================================================
 
 What breaks:
-  test_api_tasks.py: SQLite DB URL replaced with nonexistent host postgres host
-  Effect:  Database connections fail immediately with operational error.
+  requirements.txt: aiosqlite package removed
+  Effect:  Database connections fail immediately with ModuleNotFoundError: No module named 'aiosqlite'.
 
 Commands:
   bash /home/mohit/OneDrive/All_Projects/agentic_pipeline/scripts/demo/demo_reset.sh
