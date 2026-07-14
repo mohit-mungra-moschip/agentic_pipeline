@@ -25,9 +25,9 @@ graph TD
         N7 --> N8[Jira Ticket Sync]
     end
     
-    N6 --> rerun[Re-run tests to Validate]
-    rerun -- Pass --> PR[Create Pull Request]
-    rerun -- Fail --> JiraTODO[Create Jira Bug Ticket]
+    N6 --> rerun[Re-run suite]
+    rerun -- Pass --> JiraReview[Create Jira in Review] --> PR[Create Pull Request]
+    rerun -- Fail --> JiraTODO[Create Jira in TODO]
 ```
 
 ---

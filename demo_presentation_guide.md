@@ -112,21 +112,22 @@ graph TD
     B -- Yes --> D[Failure Parsing]
     D --> E[LLM Failure Analysis]
     
-    E --> F{Failure Type?}
+    E --> H{Healing Type?}
+    H -- TEST_BUG --> I[Apply Suggested Test Fix]
+    H -- APP_BUG --> J[Apply Suggested App Fix]
+    H -- ENV_ISSUE --> K[Apply Suggested Env Fix]
+    H -- SCHEMA / UNKNOWN --> L[Apply Suggested Fix]
     
-    F -- TEST_BUG --> G[Edit Test Code]
-    F -- APP_BUG --> H[Edit App Code]
-    F -- ENV_ISSUE --> I[Attempt Auto-Heal Config]
-    F -- SCHEMA / UNKNOWN --> J[Attempt Code Fix]
+    I --> M[Re-run suite]
+    J --> M
+    K --> M
+    L --> M
     
-    G --> K[Re-run suite]
-    H --> K
-    I --> K
-    J --> K
+    M --> N{Pass?}
+    N -- Yes --> O[Create Jira in Review]
+    O --> P[Create PR]
     
-    K --> L{Pass?}
-    L -- Yes --> M[Create PR & Jira IN REVIEW]
-    L -- No --> N{Max attempts reached?}
-    N -- No --> E
-    N -- Yes --> O[Create Jira TODO]
+    N -- No --> Q{Max attempts reached?}
+    Q -- No --> E
+    Q -- Yes --> R[Create Jira in TODO]
 ```

@@ -156,7 +156,7 @@ Commands:
   Demo 07 — ENV ISSUE: Auto-Healed Database Connection Configuration
   Breaks:  TC-001 to TC-011 (all integration task tests due to broken DB host)
   Files:   tests/integration/test_api_tasks.py
-  Heal:    TEST_HEAL (AI fixes URL path back to a local SQLite memory endpoint)
+  Heal:    ENV_ISSUE (AI fixes URL path back to a local SQLite memory endpoint)
   Jira:    Created and updated to "IN REVIEW"
   PR:      Created automatically (Dev / QA branch)
 ================================================================================
@@ -225,7 +225,7 @@ Commands:
   04   | 04_heal_app_crud_pagination.sh | HEAL         | APP_HEAL   | IN REVIEW   | Yes
   05   | 05_heal_app_subtask_gate.sh    | HEAL         | APP_HEAL   | IN REVIEW   | Yes
   06   | 06_heal_mixed_combo.sh         | HEAL         | MIXED      | IN REVIEW   | Yes
-  07   | 07_fail_env_broken_db.sh       | HEAL         | TEST_HEAL  | IN REVIEW   | Yes
+  07   | 07_fail_env_broken_db.sh       | HEAL         | ENV_ISSUE  | IN REVIEW   | Yes
   08   | 08_fail_schema_mismatch.sh     | FAIL         | APP_BUG    | TODO        | No
   09   | 09_fail_mixed_combo.sh         | FAIL         | MIXED      | TODO        | No
 
