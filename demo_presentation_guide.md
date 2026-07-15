@@ -101,33 +101,33 @@ Here is exactly what breaks, why it fails, how the AI heals it, and the resultin
 
 ---
 
-## 📈 4. The Self-Healing Decision Matrix
-
-![AI Self-Healing Decision Matrix Flowchart](docs/images/self_healing_decision_matrix.png)
+![AI Self-Healing Decision Matrix Flowchart](docs/images/self_healing_decision_matrix_pro.png)
 
 ```mermaid
 graph TD
-    A[Run pytest] --> B{Any Test Failed?}
-    B -- No --> C[Report 100% Pass]
+    A[Test Execution] --> B{Any Test Failed?}
+    B -- No --> C[Test Results & Report]
     B -- Yes --> D[Failure Parsing]
     D --> E[LLM Failure Analysis]
     
-    E --> H{Healing Type?}
-    H -- TEST_BUG --> I[Apply Suggested Test Fix]
-    H -- APP_BUG --> J[Apply Suggested App Fix]
-    H -- ENV_ISSUE --> K[Apply Suggested Env Fix]
-    H -- SCHEMA / UNKNOWN --> L[Apply Suggested Fix]
+    E --> H{Failure Type?}
+    H --> I[TEST_BUG]
+    H --> J[APP_BUG]
+    H --> K[ENV_ISSUE]
+    H --> L[SCHEMA / UNKNOWN]
     
-    I --> M[Re-run suite]
-    J --> M
-    K --> M
-    L --> M
+    I --> JC[Jira Creation]
+    J --> JC
+    K --> JC
+    L --> JC
     
-    M --> N{Pass?}
-    N -- Yes --> O[Create Jira in Review]
-    O --> P[Create PR]
+    JC --> FIX[Apply LLM Fix Jira-Linked]
+    FIX --> M[Test Re-Execution]
     
-    N -- No --> Q{Max attempts reached?}
+    M --> N{Result}
+    N -- Pass --> PR[Create PR] --> MoveJiraReview[Move Jira to In Review]
+    
+    N -- Fail --> Q{Max attempts reached?}
     Q -- No --> E
-    Q -- Yes --> R[Create Jira in TODO]
+    Q -- Yes --> MoveJiraTODO[Move Jira to TODO]
 ```

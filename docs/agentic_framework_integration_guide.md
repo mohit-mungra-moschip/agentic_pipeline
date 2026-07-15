@@ -20,14 +20,14 @@ graph TD
         N2 --> N3[Fetch Code Files]
         N3 --> N4[LLM Failure Analysis]
         N4 --> N5[Git Blame Root Cause]
-        N5 --> N6[LLM Code Self-Healing]
+        N5 --> N8[Jira Creation]
+        N8 --> N6[Apply LLM Fix]
         N6 --> N7[Action Recommendations]
-        N7 --> N8[Jira Ticket Sync]
     end
     
-    N6 --> rerun[Re-run suite]
-    rerun -- Pass --> JiraReview[Create Jira in Review] --> PR[Create Pull Request]
-    rerun -- Fail --> JiraTODO[Create Jira in TODO]
+    N6 --> rerun[Test Re-Execution]
+    rerun -- Pass --> PR[Create Pull Request] --> MoveJiraReview[Move Jira to In Review]
+    rerun -- Fail --> MoveJiraTODO[Move Jira to TODO]
 ```
 
 ---
@@ -225,7 +225,7 @@ To verify that your integration is successful:
   python regression_runner.py --ci-mode --create-jira false
   ```
 - [ ] Check `reports/` for:
-  - `ai_summary.json` containing the failure details and LLM classification.
+  - `test_results_<timestamp>.json` containing the full test results state and LLM classification.
   - An HTML report showing the failure under the healed/unhealed classification.
   - A spreadsheet Excel file containing the mapped failure details.
 - [ ] Verify that the file was automatically repaired on disk.
