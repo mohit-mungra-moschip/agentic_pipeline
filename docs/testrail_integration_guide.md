@@ -168,8 +168,9 @@ def sync_results_to_testrail(json_report_path: str):
 Add the following variables to your `.env` file:
 ```ini
 TESTRAIL_ENABLED=true
-TESTRAIL_URL=https://your-domain.testrail.io
-TESTRAIL_USERNAME=qa-automation@company.com
-TESTRAIL_API_TOKEN=your_testrail_api_token_here
-TESTRAIL_RUN_ID=4567  # The ID of the test run to update
+TESTRAIL_URL=https://regression.testrail.io/
+TESTRAIL_USERNAME=mohit.mungra@moschip.com
+TESTRAIL_API_TOKEN=NimDg72S93AOFi55OfAW-R7KoK0ZK6yXTZtivR.Pk
+TESTRAIL_PROJECT_ID=3
+TESTRAIL_RUN_ID=1234  # The ID of the test run to update (or leave empty to create a new run)
 ```
