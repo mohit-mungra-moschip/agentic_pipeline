@@ -48,6 +48,9 @@ jobs:
     name: 🧪 Regression + AI Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      REGRESSION_RUN_ID: ${{ github.run_id }}
+      REGRESSION_RUN_STAMP: ${{ github.run_id }}
     permissions:
       contents: write
       pull-requests: write
