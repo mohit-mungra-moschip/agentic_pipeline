@@ -156,6 +156,12 @@ jobs:
           SELF_HEALING_MODEL: "groq/llama-3.3-70b-versatile"
           ADVANCED_HEALING_MODEL: "groq/llama-3.3-70b-versatile"
           PYTHONPATH: .
+          TESTRAIL_ENABLED: "true"
+          TESTRAIL_URL: "https://regression.testrail.io/"
+          TESTRAIL_EMAIL: "mohit.mungra@moschip.com"
+          TESTRAIL_PASSWORD: "MMP@welcome1234"
+          TESTRAIL_PROJECT_ID: "3"
+          TESTRAIL_SUITE_ID: "7"
         run: |
           source .venv/bin/activate
           # Clean all __pycache__ and .pyc files before execution
