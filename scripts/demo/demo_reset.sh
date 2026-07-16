@@ -17,7 +17,7 @@ fi
 
 # 2. Reset Test repository and push clean state to remote
 cd "$TEST_DIR"
-git checkout f8fc398 -- tests/ requirements.txt
+git checkout acb9f42 -- tests/ requirements.txt
 if ! git diff --quiet tests/ requirements.txt; then
   git commit -am "demo: reset tests to clean state" && git push origin main || true
   echo "✅  tests/ and requirements.txt restored & synced to remote"
