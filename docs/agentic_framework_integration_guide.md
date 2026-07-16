@@ -139,93 +139,185 @@ To keep the framework's core LLM prompts fully generic and reusable across any s
 
 ---
 
-## 🔗 5. GitHub Cloning and Repository Strategy (Monorepo vs. Multi-Repo)
+## 🔗 5. Repository Strategy — Dual-Repo vs Monorepo
 
-Depending on your engineering setup, you can run the self-healing framework in either a **Monorepo** or a **Multi-Repo (split App & Tests)** configuration.
+The pipeline supports both setups via a **single flag** in the GitHub Actions workflow: `monorepo_mode`.
+No code changes are required — just toggle the input when dispatching the workflow.
 
-### Option A: Monorepo Setup (Recommended & Simplest)
-If your application code and your test suites live in the **same GitHub repository**:
-1. **No Extra Tokens needed**: You do not need a custom `TEST_REPO_TOKEN` or a separate checkout step in your GitHub Actions workflow.
-2. **Simplified Pathing**: Place your test files in a standard `tests/` directory at the root. No need to clone into a `test_framework` path.
-3. **Single PR Creation**: If the AI heals test assertions or application code, both types of fixes can be committed to the same branch and raised in a single PR using the default `secrets.GITHUB_TOKEN`.
-4. **Code Adjustments**:
-   - In `regression_runner.py` (line 395), simplify the fallback repo check:
-     ```python
-     repo = "your-single-repository"
-     ```
+---
 
-### Option B: Multi-Repo Setup (Split App and QA Test Repositories)
-If your QA test automation suites live in a **separate repository** from your main application (matching this project's current structure):
-1. **Create Personal Access Token (PAT)**: Create a GitHub PAT with `repo` scopes that has access to both repositories.
-2. **Set up GitHub Secrets**:
-   - Add the PAT as a repository secret in your Application repository named `TEST_REPO_TOKEN`.
-3. **Cloning during Action execution**:
-   - Configure the checkout step in your Application workflow to pull the test repository:
-     ```yaml
-     - name: Checkout Test Repository
-       uses: actions/checkout@v4
-       with:
-         repository: 'your-organization/your-tests-repository'
-         token: ${{ secrets.TEST_REPO_TOKEN }}
-         path: test_framework
-     ```
-4. **Action Target updates**:
-   - **For App Fixes**: Commit changes inside the root directory and create the PR targeting the main repository using `secrets.GITHUB_TOKEN`.
-   - **For QA Test Fixes**: Run commands inside the `test_framework` directory (`cd test_framework`), commit/push the branch, and create the PR targeting the test repository using `secrets.TEST_REPO_TOKEN` as the auth token.
-5. **Code Adjustments**:
-   - In `regression_runner.py` (line 395), update the repository names to match your own:
-     ```python
-     repo = "your-tests-repository" if h_type == "TEST_HEAL" else "your-app-repository"
-     ```
+### Mode A: Dual-Repo (Default — Current Setup)
+
+Application code and test code live in **separate GitHub repositories**.
+
+```
+agentic_pipeline/            ← App repo (this repo)
+└── app/
+    ├── crud.py
+    ├── models.py
+    └── routers/
+
+agentic_pipeline_tests/      ← Test repo (checked out into test_framework/)
+└── tests/
+    ├── unit/
+    └── integration/
+```
+
+**Requirements:**
+1. Create a GitHub PAT with `repo` scope that has access to both repositories.
+2. Add it as `TEST_REPO_TOKEN` secret in the App repository.
+3. The workflow automatically checks out the test repo at `test_framework/` using this token.
+4. Healed test fixes → PR created in the **test repo** using `TEST_REPO_TOKEN`.
+5. Healed app fixes → PR created in the **app repo** using built-in `GITHUB_TOKEN`.
+
+**Workflow dispatch:**
+```yaml
+monorepo_mode: false          # (default — no change needed)
+test_repo: your-org/your-tests-repo   # override if using a different test repo
+```
+
+---
+
+### Mode B: Monorepo (Single Repo)
+
+Application code and test code live in the **same repository**.
+
+```
+your_project/                ← Single repo
+├── app/
+│   ├── crud.py
+│   ├── models.py
+│   └── routers/
+└── tests/
+    ├── unit/
+    └── integration/
+```
+
+**Requirements:**
+1. No extra tokens needed — the built-in `GITHUB_TOKEN` handles everything.
+2. Place `regression_runner.py` and `requirements.txt` at the **repo root**.
+3. Test files must be under `tests/` at the root.
+
+**Workflow dispatch:**
+```yaml
+monorepo_mode: true           # ← this one flag switches the entire pipeline
+```
+
+**What changes automatically when `monorepo_mode: true`:**
+
+| Setting | Dual-Repo | Monorepo |
+|---------|-----------|----------|
+| Checkout | 2 checkouts | 1 checkout |
+| Test path | `test_framework/tests/` | `tests/` |
+| Runner | `test_framework/regression_runner.py` | `regression_runner.py` |
+| Token for test PR | `TEST_REPO_TOKEN` | `GITHUB_TOKEN` (built-in) |
+| `requirements.txt` | `test_framework/` | repo root |
+| PR `--repo` flag | external test repo | same repo (auto) |
+
+**What stays the same in both modes:**
+- LLM failure classification (`TEST_BUG` / `APP_BUG` / `ENV_ISSUE` / `SCHEMA`)
+- Auto code healing logic
+- Jira ticket creation and Smart Commit transitions
+- PR branch naming with Jira IDs
+- Excel + HTML report generation
+- Jira webhook sync (PR close/reopen)
+
+> **Note:** In monorepo mode, healed app and test fixes still get separate branches
+> (`ai-fix-app` and `ai-fix-tests`) and separate PRs within the same repo,
+> so each fix can be reviewed independently.
 
 ---
 
 ## 🔀 6. CI/CD Orchestration (GitHub Actions)
 
-Copy and adapt `.github/workflows/regression.yml` to trigger the pipeline automatically when code is pushed or a test suite fails. 
+Copy `.github/workflows/regression.yml` from this repository into your project and update the repository references. The workflow is fully parameterised — all options are exposed as `workflow_dispatch` inputs.
 
-The workflow needs to:
-1. Run `pytest` and output logs to `logs/test-results.xml` and `reports/raw_output.txt`.
-2. Run the `regression_runner.py` entrypoint.
-3. Check the `healing_type` output from the runner:
-   - If `APP_HEAL` or `MIXED`: Checkout a new branch `ai-fix/app-${run_id}`, apply the healed app code, and open a Pull Request.
-   - If `TEST_HEAL` or `MIXED`: Checkout a new branch `ai-fix/test-${run_id}` in the tests repository, apply the healed test assertions, and open a Pull Request.
+### Workflow Inputs Reference
 
-### GitHub Action Workflow Structure (Excerpt):
+| Input | Type | Default | Description |
+|-------|------|---------|-------------|
+| `test_scope` | choice | `all` | Which test folder/file to run |
+| `enable_self_healing` | boolean | `true` | Toggle AI healing on/off |
+| `create_jira_tickets` | boolean | `true` | Toggle Jira ticket creation |
+| `max_healing_iterations` | string | `3` | Max LLM fix attempts per failure |
+| `monorepo_mode` | boolean | `false` | **Switch to single-repo mode** |
+| `test_repo` | string | `agentic_pipeline_tests` | Override test repo (dual-repo only) |
+
+### Required GitHub Secrets
+
+| Secret | Required When | Purpose |
+|--------|--------------|--------|
+| `GITHUB_TOKEN` | Always (built-in) | App PR creation |
+| `TEST_REPO_TOKEN` | `monorepo_mode: false` only | Test repo checkout + Test PR |
+| `GEMINI_API_KEY` / `GROQ_API_KEY` | Always | LLM provider |
+| `JIRA_SERVER`, `JIRA_USERNAME`, `JIRA_PASSWORD` | If Jira enabled | Ticket creation |
+
+### Triggering the Pipeline
+
+**Automatic triggers:**
+- Push to `main` branch
+- Daily at midnight UTC (`schedule`)
+- When the test repo pushes to `main` (`repository_dispatch: test-repo-push`)
+
+**Manual trigger (monorepo example):**
 ```yaml
-- name: Run Pytest
-  run: |
-    pytest tests/ -v --tb=short --junitxml=logs/test-results.xml > reports/raw_output.txt || true
+# Via GitHub UI → Actions → Run workflow
+monorepo_mode: true
+test_scope: all
+create_jira_tickets: true
+max_healing_iterations: 3
+```
 
-- name: Run RegressionAI Pipeline
-  env:
-    GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-    JIRA_PASSWORD: ${{ secrets.JIRA_PASSWORD }}
-  run: |
-    python regression_runner.py --ci-mode --create-jira true
+**Manual trigger (dual-repo with custom test repo):**
+```yaml
+monorepo_mode: false
+test_repo: your-org/your-tests-repo
+test_scope: integration
+create_jira_tickets: true
+```
 
-- name: Create Dev Pull Request (if APP healed)
-  if: env.HEALING_TYPE == 'APP_HEAL' || env.HEALING_TYPE == 'MIXED'
-  run: |
-    git checkout -b ai-fix/app-${{ github.run_id }}
-    git add app/
-    git commit -m "AI: self-healed application bugs"
-    git push origin ai-fix/app-${{ github.run_id }}
-    gh pr create --title "AI Self-Healing: Fix application bugs" --body-file reports/pr_body.md
+### Pipeline Flow Summary
+```
+Checkout(s) → Install deps → Run pytest → AI Analysis →
+  If APP_HEAL or MIXED  → branch ai-fix-app   → PR in App repo
+  If TEST_HEAL or MIXED → branch ai-fix-tests → PR in Test repo (or same repo if monorepo)
+  If SCHEMA/UNKNOWN     → Jira TODO ticket only, no PR
 ```
 
 ---
 
 ## ✅ 7. Integration Verification Checklist
 
-To verify that your integration is successful:
-- [ ] Run `pytest` locally to confirm `logs/test-results.xml` is generated with `conftest.py` active.
-- [ ] Artificially break a test assertion (e.g. change an expected response string) and run:
+### Local Verification
+- [ ] Run `pytest tests/` locally — confirm `reports/test_results.json` and `reports/raw_output.txt` are generated.
+- [ ] Manually break a test assertion and run:
   ```bash
   python regression_runner.py --ci-mode --create-jira false
   ```
 - [ ] Check `reports/` for:
-  - `test_results_<timestamp>.json` containing the full test results state and LLM classification.
-  - An HTML report showing the failure under the healed/unhealed classification.
-  - A spreadsheet Excel file containing the mapped failure details.
-- [ ] Verify that the file was automatically repaired on disk.
+  - `ai_summary.json` — contains `healing_type`, classified failures, and Jira IDs.
+  - An HTML report showing healed vs unhealed breakdown.
+  - An Excel file with failure details and PR/Jira links.
+- [ ] Verify the broken file was automatically repaired on disk.
+
+### CI/CD Verification (Dual-Repo)
+- [ ] `TEST_REPO_TOKEN` secret is set in the App repo with `repo` scope.
+- [ ] Push a broken test to `main` — confirm the workflow runs both checkout steps.
+- [ ] After a `TEST_HEAL`, confirm a PR is created in the **test repository**.
+- [ ] After an `APP_HEAL`, confirm a PR is created in the **app repository**.
+- [ ] Jira tickets appear under the correct project key and transition to `IN REVIEW` after healing.
+
+### CI/CD Verification (Monorepo)
+- [ ] `monorepo_mode: true` dispatched — confirm only **one** checkout step runs.
+- [ ] `TEST_REPO_TOKEN` is **not** required — pipeline uses built-in `GITHUB_TOKEN` only.
+- [ ] After a `TEST_HEAL`, confirm a PR appears in the **same repo** on branch `ai-fix-tests`.
+- [ ] After a `MIXED`, confirm **two separate PRs** in the same repo (`ai-fix-app` + `ai-fix-tests`).
+
+### Failure Classification Spot-Check
+| Break introduced | Expected `healing_type` | Expected output |
+|-----------------|------------------------|-----------------|
+| Wrong test assertion value | `TEST_HEAL` | PR on tests branch |
+| Inverted `if` in app router | `APP_HEAL` | PR on app branch |
+| Wrong DB URL in test config | `TEST_HEAL` | PR on tests branch |
+| Renamed DB column (no migration) | `NONE` | Jira TODO only |
+| Both assertion + router bug | `MIXED` | 2 PRs created |
