@@ -1,4 +1,4 @@
-name: 🤖 AI Regression Pipeline
+name: AI Regression Pipeline
 
 on:
   push:
@@ -55,7 +55,7 @@ on:
 
 jobs:
   regression:
-    name: 🧪 Regression + AI Analysis
+    name: Regression + AI Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -77,13 +77,13 @@ jobs:
 
     steps:
       # ── Checkout App Repo ───────────────────────────────────────────────────
-      - name: 📥 Checkout App Repository
+      - name: Checkout App Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 20
 
       # ── Checkout Test Repo (skipped in monorepo mode) ─────────────────────
-      - name: 📥 Checkout Test Repository
+      - name: Checkout Test Repository
         if: ${{ inputs.monorepo_mode != true }}
         uses: actions/checkout@v4
         with:
@@ -93,14 +93,14 @@ jobs:
           fetch-depth: 20
 
       # ── Python Setup ────────────────────────────────────────────────────────
-      - name: 🐍 Set up Python 3.12
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'pip'
           cache-dependency-path: ${{ inputs.monorepo_mode == true && 'requirements.txt' || 'test_framework/requirements.txt' }}
 
-      - name: 📦 Install Dependencies
+      - name: Install Dependencies
         run: |
           python -m venv .venv
           source .venv/bin/activate
@@ -115,7 +115,7 @@ jobs:
           pip install pytest-json-report
 
       # ── Database Setup ──────────────────────────────────────────────────────
-      - name: 🗄️ Setup Database
+      - name: Setup Database
         env:
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/regression_ai
         run: |
@@ -124,7 +124,7 @@ jobs:
           python -c "import asyncio; from app.database import engine, Base; exec('async def init():\n    async with engine.begin() as conn:\n        await conn.run_sync(Base.metadata.create_all)\nasyncio.run(init())')" || true
 
       # ── Execute Tests ───────────────────────────────────────────────────────
-      - name: 🧪 Execute Regression Tests
+      - name: Execute Regression Tests
         id: run_tests
         continue-on-error: true
         env:
@@ -164,7 +164,7 @@ jobs:
           echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
 
       # ── Run AI Analysis & Self-Healing ──────────────────────────────────────
-      - name: 🤖 Run AI Regression Analysis Pipeline
+      - name: Run AI Regression Analysis Pipeline
         id: ai_pipeline
         env:
           DEFAULT_MODEL: ${{ vars.DEFAULT_MODEL || 'groq/llama-3.3-70b-versatile' }}
@@ -238,7 +238,7 @@ jobs:
           echo "jira_ids_short=$JIRA_IDS_SHORT" >> $GITHUB_OUTPUT
 
       # ── Create PR for App Changes (If App was healed — APP_HEAL or MIXED) ──
-      - name: 🚀 PR for Application Fixes
+      - name: PR for Application Fixes
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -250,7 +250,7 @@ jobs:
             find app/ -type f -name "*.pyc" -delete 2>/dev/null || true
             CHANGED=$(git diff --name-only | grep -E '(app/.*\.py|requirements\.txt|pyproject\.toml|setup\.py)$' || true)
             if [ -n "$CHANGED" ]; then
-              echo "✨ Found healed changes in App code or dependencies ($HEALING_TYPE). Creating branch and PR..."
+              echo "Found healed changes in App code or dependencies ($HEALING_TYPE). Creating branch and PR..."
               git config --global user.name "github-actions[bot]"
               git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -310,7 +310,7 @@ jobs:
           fi
 
       # ── Create PR for Test Changes (If Tests were healed — TEST_HEAL or MIXED) ──
-      - name: 🚀 PR for Test Framework Fixes
+      - name: PR for Test Framework Fixes
         if: always()
         env:
           # In monorepo mode use built-in GITHUB_TOKEN; in dual-repo use TEST_REPO_TOKEN
@@ -342,7 +342,7 @@ jobs:
             # Only open a PR if actual test/config files were modified
             CHANGED=$(git diff --name-only | grep -E '(tests/.*\.py|requirements\.txt|pyproject\.toml|setup\.py)$' || true)
             if [ -n "$CHANGED" ]; then
-              echo "✨ Found healed changes in tests ($HEALING_TYPE). Creating branch and PR..."
+              echo "Found healed changes in tests ($HEALING_TYPE). Creating branch and PR..."
               git config --global user.name "github-actions[bot]"
               git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -414,7 +414,7 @@ jobs:
           fi
 
       # ── Surface ENV_ISSUE Summary in GitHub Step Summary ───────────────────
-      - name: 📋 Surface ENV_ISSUE Report
+      - name: Surface ENV_ISSUE Report
         if: always()
         run: |
           python - <<'EOF'
@@ -430,7 +430,7 @@ jobs:
           env_issues = data.get("env_issues", [])
 
           if not env_issues:
-              print("✅ No ENV_ISSUE failures detected.")
+              print("No ENV_ISSUE failures detected.")
               sys.exit(0)
 
           # Write to GitHub Step Summary
@@ -442,7 +442,7 @@ jobs:
               pass
 
           report_lines = [
-              "## ⚙️ Environment Issues Detected\n",
+              "## Environment Issues Detected\n",
               "> These failures could **not** be auto-fixed. Manual remediation is required.\n",
               "",
           ]
@@ -461,7 +461,7 @@ jobs:
           EOF
 
       # ── Upload Artifacts & Final Check ──────────────────────────────────────
-      - name: 📊 Upload Test Reports
+      - name: Upload Test Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
