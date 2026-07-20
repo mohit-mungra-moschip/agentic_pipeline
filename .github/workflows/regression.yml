@@ -15,6 +15,7 @@ on:
         required: true
         default: 'all'
         type: choice
+        # ⚠️ PORTING NOTE: Update these options to match the specific test directories or test files of your new project
         options:
           - all
           - unit
@@ -50,6 +51,7 @@ on:
       test_repo:
         description: 'Test repository (only used when monorepo_mode is false)'
         required: false
+        # ⚠️ PORTING NOTE: Change the default value below to your own target test repository name
         default: 'mohit-mungra-moschip/agentic_pipeline_tests'
         type: string
 
@@ -87,6 +89,7 @@ jobs:
         if: ${{ inputs.monorepo_mode != true }}
         uses: actions/checkout@v4
         with:
+          # ⚠️ PORTING NOTE: Change 'mohit-mungra-moschip/agentic_pipeline_tests' below to your own target test repository name
           repository: ${{ inputs.test_repo || 'mohit-mungra-moschip/agentic_pipeline_tests' }}
           token: ${{ secrets.TEST_REPO_TOKEN }}
           path: test_framework
@@ -183,12 +186,13 @@ jobs:
           SELF_HEALING_MODEL: "groq/llama-3.3-70b-versatile"
           ADVANCED_HEALING_MODEL: "groq/llama-3.3-70b-versatile"
           PYTHONPATH: .
+          # ⚠️ PORTING NOTE: Configure TestRail parameters below or move them to GitHub Secrets/Variables.
           TESTRAIL_ENABLED: "true"
           TESTRAIL_URL: "https://regression.testrail.io/"
-          TESTRAIL_EMAIL: "mohit.mungra@moschip.com"
-          TESTRAIL_PASSWORD: "MMP@welcome1234"
-          TESTRAIL_PROJECT_ID: "3"
-          TESTRAIL_SUITE_ID: "7"
+          TESTRAIL_EMAIL: "mohit.mungra@moschip.com"  # ⚠️ Change to your TestRail email or use ${{ secrets.TESTRAIL_EMAIL }}
+          TESTRAIL_PASSWORD: "MMP@welcome1234"        # ⚠️ Change to your TestRail API Token/Password or use ${{ secrets.TESTRAIL_PASSWORD }}
+          TESTRAIL_PROJECT_ID: "3"                    # ⚠️ Change to your TestRail Project ID or use ${{ vars.TESTRAIL_PROJECT_ID }}
+          TESTRAIL_SUITE_ID: "7"                      # ⚠️ Change to your TestRail Suite ID or use ${{ vars.TESTRAIL_SUITE_ID }}
         run: |
           source .venv/bin/activate
           # Clean all __pycache__ and .pyc files before execution

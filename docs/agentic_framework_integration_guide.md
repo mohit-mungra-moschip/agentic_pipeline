@@ -37,8 +37,10 @@ graph TD
 Follow these steps to integrate the self-healing pipeline into your new project.
 
 ### Step 1: Copy Core Framework Files
-Copy the following files and folders from the test repository into your new repository's testing directory (e.g., `tests/` or root):
+Depending on your repository architecture, copy the framework files to the respective repositories as specified below:
 
+#### Option A: Monorepo Setup (Single Repository)
+Copy all files and folders directly to the root of your single project repository:
 ```text
 ├── RegressionAI/             # Core LangGraph agent architecture
 │   ├── agents/               # 8 Agent nodes (Test runner, failure parse, healing, Jira, etc.)
@@ -50,32 +52,81 @@ Copy the following files and folders from the test repository into your new repo
 ├── config.py                 # Global configurations
 ├── conftest.py               # Pytest hooks for failure capture & metadata extraction
 ├── regression_runner.py      # Entry point script that orchestrates the flow
-└── requirements.txt          # Python dependencies
+├── pr_body_generator.py      # Script to generate GitHub Pull Request descriptions with Jira links & healing details
+└── requirements.txt          # Python dependencies (to merge with existing project requirements)
 ```
 
-### Step 2: Install Python Dependencies
-Install the required dependencies in your new project's environment:
-```bash
-pip install -r requirements.txt
-```
-*Key dependencies include: `langgraph`, `langchain-core`, `langchain-google-genai`, `pytest`, `openpyxl`, `jira`, `click`, `rich`, `python-dotenv`.*
+#### Option B: Dual-Repo Setup (Separate App and Test Repositories)
+Distribute the files between the two repositories:
+
+1. **In the Application Repository**:
+   * `.github/workflows/regression.yml` (placed inside `.github/workflows/` directory)
+   * `pr_body_generator.py` (placed at the root of the repository)
+
+2. **In the Test Repository**:
+   * `RegressionAI/` (folder at the root)
+   * `common_utils/` (folder at the root)
+   * `utils/` (folder at the root)
+   * `config.py` (at the root)
+   * `conftest.py` (at the root or tests directory)
+   * `regression_runner.py` (at the root)
+   * `requirements.txt` (at the root - merge with existing test repository requirements)
+
+---
+
+### Step 2: Merge and Install Python Dependencies
+To avoid overwriting your project's existing dependencies, **do not replace** your current requirements file. Instead, append the framework dependencies to your existing file.
+
+1. **Merge Dependencies**:
+   Open the framework's `requirements.txt` and append/merge the dependencies into your project's existing `requirements.txt` (for monorepos, this is your application's requirements; for dual-repos, this is your test repository's `requirements.txt`).
+   
+   **Key framework dependencies to append:**
+   ```text
+   langgraph
+   langchain-core
+   langchain-google-genai
+   pytest
+   openpyxl
+   jira
+   click
+   rich
+   python-dotenv
+   pytest-json-report
+   requests
+   ```
+
+2. **Install Dependencies**:
+   Install the merged dependencies in your target environment:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ### Step 3: Configure Environment Variables
-Set up your `.env` file in the root of the project with the following keys:
+Set up your `.env` file in the root of the environment where tests are run (for Monorepo, at the project root; for Dual-Repo, inside the **Test Repository's** root) with the following keys:
 
 ```ini
-# LLM Provider Key (Google Gemini)
+# LLM Provider Key (Google Gemini / Groq / Anthropic)
 GEMINI_API_KEY=your_gemini_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
 
 # GitHub Integration
 GITHUB_TOKEN=your_github_token_here
-TEST_REPO_TOKEN=your_cross_repo_token_here (if using separate QA repo)
+TEST_REPO_TOKEN=your_cross_repo_token_here (PAT with 'repo' scope to clone the test repository inside the application repository)
 
 # Jira Integration
 JIRA_SERVER=https://your-domain.atlassian.net
 JIRA_USERNAME=your-email@domain.com
 JIRA_PASSWORD=your_jira_api_token_here
 CREATE_JIRA=true # Set to false to disable ticket creation
+
+# TestRail Integration (Optional)
+TESTRAIL_ENABLED=true
+TESTRAIL_URL=https://your-domain.testrail.io/
+TESTRAIL_EMAIL=your-email@domain.com
+TESTRAIL_PASSWORD=your_testrail_api_token_or_password_here
+TESTRAIL_PROJECT_ID=3
+TESTRAIL_SUITE_ID=7
+TESTRAIL_RUN_ID=1234 # Optional: Keep empty to create a new run automatically
 ```
 
 ---
@@ -133,9 +184,32 @@ The framework is configured to route `ENV_ISSUE` failures through the self-heali
 
 ### E. Define Project-Specific Prompt Rules (`project_rules.md`)
 To keep the framework's core LLM prompts fully generic and reusable across any software project, project-specific rules are separated from the main codebase.
-1. Create a `project_rules.md` file in the root of your target project.
+1. Create a `project_rules.md` file in the root of your target project (for Monorepo, at the project root; for Dual-Repo, at the root of the **Application Repository**).
 2. Write any project-specific guidelines or constraints (e.g., "Do not delete the 'client' fixture", "Ensure FastAPI routes are decorated with async", database restrictions, etc.) in this file.
 3. The self-healing agent will automatically detect and load this file, appending it to the core instructions dynamically. If the file is not present, the agent falls back to pure generic instructions.
+
+### F. Adjust TestRail Settings
+If you use TestRail for automated test result tracking:
+1. Make sure to define the following parameters in your `.env` file (placed in the **Test Repository** root for Dual-Repo setup, or project root for Monorepo setup):
+   ```ini
+   TESTRAIL_ENABLED=true
+   TESTRAIL_URL=https://your-domain.testrail.io/
+   TESTRAIL_EMAIL=your-email@domain.com
+   TESTRAIL_PASSWORD=your_api_token_or_password_here
+   TESTRAIL_PROJECT_ID=3
+   TESTRAIL_SUITE_ID=7
+   TESTRAIL_RUN_ID=1234
+   ```
+2. When copying `.github/workflows/regression.yml` to the **Application Repository**, also update the TestRail environment variables under the `Run AI Regression Analysis Pipeline` step:
+   ```yaml
+   TESTRAIL_ENABLED: "true"
+   TESTRAIL_URL: "https://your-domain.testrail.io/"
+   TESTRAIL_EMAIL: "your-email@domain.com"      # Or use ${{ secrets.TESTRAIL_EMAIL }}
+   TESTRAIL_PASSWORD: "your-password-or-token"  # Or use ${{ secrets.TESTRAIL_PASSWORD }}
+   TESTRAIL_PROJECT_ID: "3"                      # Or use ${{ vars.TESTRAIL_PROJECT_ID }}
+   TESTRAIL_SUITE_ID: "7"                        # Or use ${{ vars.TESTRAIL_SUITE_ID }}
+   ```
+   *Note: For details on mapping pytest markers to TestRail case IDs, refer to the [TestRail Integration Guide](file:///home/mohit/OneDrive/All_Projects/agentic_pipeline/docs/testrail_integration_guide.md).*
 
 ---
 
@@ -230,7 +304,56 @@ monorepo_mode: true           # ← this one flag switches the entire pipeline
 
 ## 🔀 6. CI/CD Orchestration (GitHub Actions)
 
-Copy `.github/workflows/regression.yml` from this repository into your project and update the repository references. The workflow is fully parameterised — all options are exposed as `workflow_dispatch` inputs.
+Copy `.github/workflows/regression.yml` from this repository into your project's `.github/workflows/` directory. The workflow is fully parameterized — all options are exposed as `workflow_dispatch` inputs.
+
+### ⚠️ Essential Workflow Customizations (Porting Checklist)
+
+When copying `.github/workflows/regression.yml` to a new project, you **must** update the following values in the YAML file to match your target repository environment:
+
+1. **Update Repository References**:
+   - Locate the `test_repo` input option around line 50 and update the `default:` repository string to your own target test repository (e.g., `your-org/your-test-repo`).
+   - Locate the `Checkout Test Repository` step around line 88 and update the fallback string `repository: ${{ inputs.test_repo || 'your-org/your-test-repo' }}`.
+
+2. **Update Pytest choices (`test_scope`)**:
+   - Modify the choices list under `test_scope` (lines 18-29) to match your new repository's test structure. Keep generic tags like `all`, `unit`, and `integration`, but replace specific test filenames (like `test_project_service.py`) with your own actual test files.
+   - Update the corresponding `case` statement in both the **Execute Regression Tests** step and the **Run AI Regression Analysis Pipeline** step to handle your custom choices.
+
+3. **Update TestRail Configuration**:
+   - TestRail parameters are defined under the env block in the **Run AI Regression Analysis Pipeline** step.
+   - Update `TESTRAIL_EMAIL`, `TESTRAIL_PASSWORD` (or API Token), `TESTRAIL_PROJECT_ID`, and `TESTRAIL_SUITE_ID` to match your own TestRail instance settings. 
+   - *Best Practice*: For security, avoid hardcoding credentials in the YAML file. Reference them as secrets or variables (e.g., `${{ secrets.TESTRAIL_EMAIL }}` and `${{ secrets.TESTRAIL_API_TOKEN }}`).
+
+---
+
+### 🔑 GitHub Secrets & Variables Configuration
+
+To run the pipeline successfully, you must add the following configuration settings in your **Application Repository** (the repo where the GitHub Actions workflow file `.github/workflows/regression.yml` is run) under *Settings > Secrets and variables > Actions*:
+
+#### 1. Repository Secrets (Sensitive Data)
+
+Add the following keys under the **Secrets** tab:
+
+| Secret Name | Required When | Description / Purpose |
+|-------------|---------------|----------------------|
+| `TEST_REPO_TOKEN` | `monorepo_mode: false` (Dual-Repo) | **GitHub Personal Access Token (PAT)** with `repo` scope. This token is required to allow the workflow in your main application repository to clone the external test repository inside itself (under `test_framework/`), and to push healed test fixes back to that repository. |
+| `GEMINI_API_KEY` | If using Gemini models | API Key for Google Gemini LLM. |
+| `GROQ_API_KEY` | If using Groq models | API Key for Groq (e.g., Llama models). |
+| `JIRA_PASSWORD` | If Jira integration is enabled | Your Jira API Token (generated from Atlassian account settings). |
+| `TESTRAIL_PASSWORD` | If TestRail integration is enabled | Your TestRail API Token/Password. |
+
+#### 2. Repository Variables (Non-Sensitive Configs)
+
+Add the following keys under the **Variables** tab (or set them as defaults directly in the workflow):
+
+| Variable Name | Default / Example | Purpose |
+|---------------|-------------------|---------|
+| `DEFAULT_MODEL` | `groq/llama-3.3-70b-versatile` | The main LLM model identifier for failure analysis. |
+| `JIRA_PROJECT_KEY` | `SCRUM` | The Jira project code where tickets will be created. |
+| `JIRA_SERVER` | `https://your-domain.atlassian.net` | The server URL of your Jira Cloud instance. |
+| `JIRA_USERNAME` | `your-email@domain.com` | The email address associated with your Jira account. |
+| `TESTRAIL_URL` | `https://your-domain.testrail.io/` | Your TestRail server base URL. |
+
+---
 
 ### Workflow Inputs Reference
 
@@ -242,15 +365,6 @@ Copy `.github/workflows/regression.yml` from this repository into your project a
 | `max_healing_iterations` | string | `3` | Max LLM fix attempts per failure |
 | `monorepo_mode` | boolean | `false` | **Switch to single-repo mode** |
 | `test_repo` | string | `agentic_pipeline_tests` | Override test repo (dual-repo only) |
-
-### Required GitHub Secrets
-
-| Secret | Required When | Purpose |
-|--------|--------------|--------|
-| `GITHUB_TOKEN` | Always (built-in) | App PR creation |
-| `TEST_REPO_TOKEN` | `monorepo_mode: false` only | Test repo checkout + Test PR |
-| `GEMINI_API_KEY` / `GROQ_API_KEY` | Always | LLM provider |
-| `JIRA_SERVER`, `JIRA_USERNAME`, `JIRA_PASSWORD` | If Jira enabled | Ticket creation |
 
 ### Triggering the Pipeline
 
