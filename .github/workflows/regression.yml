@@ -6,8 +6,8 @@ on:
       - main
   repository_dispatch:
     types: [test-repo-push]   # triggered when agentic_pipeline_tests pushes to main
-  schedule:
-    - cron: '0 0 * * *'       # daily at midnight UTC
+  # schedule:
+  #   - cron: '0 0 * * *'       # daily at midnight UTC
   workflow_dispatch:
     inputs:
       test_scope:
